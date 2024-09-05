@@ -1,0 +1,12 @@
+{
+  "sqltools.connections": [
+    {
+      "previewLimit": 50,
+      "server": "localhost",
+      "driver": "PostgreSQL",
+      "connectString": "postgresql://postgres:postgres@127.0.0.1:54322/postgres",
+      "group": "Wasrik",
+      "name": "Administrasi Wasrik"
+    }
+  ]
+}

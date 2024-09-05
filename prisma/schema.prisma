@@ -1,0 +1,90 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+model Petugas {
+  id        Int      @id @default(autoincrement())
+  nama      String
+  jabatan   String?
+  NIP       String?
+  NIK       String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tim       Tim[]
+}
+
+model Tim {
+  id                 Int      @id @default(autoincrement())
+  petugas_id         Int
+  nomor_surat_tugas  String?
+  tgl_surat_tugas    DateTime?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  petugas            Petugas  @relation(fields: [petugas_id], references: [id])
+  kegiatan_pemeriksaan KegiatanPemeriksaan[]
+}
+
+model JenisPajak {
+  id        Int      @id @default(autoincrement())
+  nama      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  kegiatan_pemeriksaan KegiatanPemeriksaan[]
+}
+
+model JenisPemeriksaan {
+  id        Int      @id @default(autoincrement())
+  nama      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  kegiatan_pemeriksaan KegiatanPemeriksaan[]
+}
+
+model KategoriHasilPemeriksaan {
+  id         Int      @id @default(autoincrement())
+  keterangan String   @db.Text
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  kegiatan_pemeriksaan KegiatanPemeriksaan[]
+}
+
+enum StatusPemeriksaan {
+  DALAM_PROSES
+  BATAL
+  SELESAI
+}
+
+model KegiatanPemeriksaan {
+  id                            Int      @id @default(autoincrement())
+  tgl_pemeriksaan_mulai         DateTime?
+  tgl_pemeriksaan_selesai       DateTime?
+  NPWPD                         String?
+  nama_wp                       String?
+  masa_pajak_awal               DateTime?
+  masa_pajak_akhir              DateTime?
+  keterangan                    String?
+  jumlah_kenaikan               Int?
+  persentase_kenaikan           Float?
+  estimasi_presentasi_kenaikan  Float?
+  jenis_pajak_id                Int?
+  jenis_pemeriksaan_id          Int?
+  hasil_pemeriksaan_id          Int?
+  tim_id                        Int?
+  jenis_pajak                   JenisPajak?               @relation(fields: [jenis_pajak_id], references: [id])
+  jenis_pemeriksaan             JenisPemeriksaan?         @relation(fields: [jenis_pemeriksaan_id], references: [id])
+  hasil_pemeriksaan             KategoriHasilPemeriksaan? @relation(fields: [hasil_pemeriksaan_id], references: [id])
+  tim                           Tim?                      @relation(fields: [tim_id], references: [id])
+  status                        StatusPemeriksaan         @default(DALAM_PROSES)
+  createdAt                     DateTime @default(now())
+  updatedAt                     DateTime @updatedAt
+}
