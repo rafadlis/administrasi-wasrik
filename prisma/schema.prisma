@@ -15,22 +15,31 @@ datasource db {
 model Petugas {
   id        Int      @id @default(autoincrement())
   nama      String
+  panggilan String?
   jabatan   String?
   NIP       String?
   NIK       String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  tim       Tim[]
+  anggota_tim AnggotaTim[]
+}
+
+model AnggotaTim {
+  id        Int      @id @default(autoincrement())
+  petugas_id Int
+  tim_id Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  petugas   Petugas  @relation(fields: [petugas_id], references: [id])
+  tim       Tim      @relation(fields: [tim_id], references: [id])
 }
 
 model Tim {
   id                 Int      @id @default(autoincrement())
-  petugas_id         Int
-  nomor_surat_tugas  String?
-  tgl_surat_tugas    DateTime?
+  nama               String
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
-  petugas            Petugas  @relation(fields: [petugas_id], references: [id])
+  anggota_tim       AnggotaTim[]
   kegiatan_pemeriksaan KegiatanPemeriksaan[]
 }
 
@@ -59,7 +68,7 @@ model KategoriHasilPemeriksaan {
 }
 
 enum StatusPemeriksaan {
-  DALAM_PROSES
+  PROSES
   BATAL
   SELESAI
 }
@@ -70,6 +79,8 @@ model KegiatanPemeriksaan {
   tgl_pemeriksaan_selesai       DateTime?
   NPWPD                         String?
   nama_wp                       String?
+  nomor_surat_tugas            String?
+  tgl_surat_tugas              DateTime?
   masa_pajak_awal               DateTime?
   masa_pajak_akhir              DateTime?
   keterangan                    String?
@@ -84,7 +95,7 @@ model KegiatanPemeriksaan {
   jenis_pemeriksaan             JenisPemeriksaan?         @relation(fields: [jenis_pemeriksaan_id], references: [id])
   hasil_pemeriksaan             KategoriHasilPemeriksaan? @relation(fields: [hasil_pemeriksaan_id], references: [id])
   tim                           Tim?                      @relation(fields: [tim_id], references: [id])
-  status                        StatusPemeriksaan         @default(DALAM_PROSES)
+  status                        StatusPemeriksaan         @default(PROSES)
   createdAt                     DateTime @default(now())
   updatedAt                     DateTime @updatedAt
 }

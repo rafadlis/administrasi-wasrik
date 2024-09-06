@@ -19,39 +19,59 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { PlusIcon } from "@radix-ui/react-icons";
-import { newKegiatanSchema } from "./new-kegiatan-schema";
+import { newKegiatanSchema } from "../lib/new-kegiatan-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 
 import { CalendarSelect } from "./calendar";
 import { Switch } from "./ui/switch";
 import { Input } from "./ui/input";
+import {
+  useHasilPemeriksaan,
+  useJenisPajak,
+  useJenisPemeriksaan,
+  useTim,
+} from "@/lib/get-other-client";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
+import { Textarea } from "./ui/textarea";
+import { toast } from "sonner";
+import { newKegiatan } from "@/lib/new-kegiatan";
+import { Loader2 } from "lucide-react";
+import { Progress } from "./ui/progress";
 
 export function NewKegiatanDialog() {
+  const [open, setOpen] = useState(false);
+
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>
+        <Button onClick={() => setOpen(true)}>
           <PlusIcon className="w-4 h-4 mr-2" />
           Tambah Kegiatan
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent onPointerDownOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>Tambah Kegiatan</DialogTitle>
           <DialogDescription>
             Silahkan isi form dibawah ini untuk menambahkan kegiatan baru
           </DialogDescription>
         </DialogHeader>
-        <NewKegiatanForm />
+        <NewKegiatanForm onSuccess={() => setOpen(false)} />
       </DialogContent>
     </Dialog>
   );
 }
 
-function NewKegiatanForm() {
+function NewKegiatanForm({ onSuccess }: { onSuccess: () => void }) {
   const [step, setStep] = useState(1);
   const totalSteps = 5;
   const form = useForm<z.infer<typeof newKegiatanSchema>>({
@@ -62,16 +82,51 @@ function NewKegiatanForm() {
     },
   });
 
+  // fetch data
+  const { dataJenisPajak, errorJenisPajak, isLoadingJenisPajak } =
+    useJenisPajak();
+  const {
+    dataJenisPemeriksaan,
+    errorJenisPemeriksaan,
+    isLoadingJenisPemeriksaan,
+  } = useJenisPemeriksaan();
+  const {
+    dataHasilPemeriksaan,
+    errorHasilPemeriksaan,
+    isLoadingHasilPemeriksaan,
+  } = useHasilPemeriksaan();
+  const { dataTim, errorTim, isLoadingTim } = useTim();
+
+  const [isSubmiting, submiting] = useTransition();
   const onSubmit = (data: z.infer<typeof newKegiatanSchema>) => {
-    console.log(data);
-    // Handle form submission
+    submiting(() => {
+      newKegiatan(data).then((res) => {
+        if (res.type === "success") {
+          toast.success(res.header, {
+            description: res.message,
+          });
+          onSuccess();
+        } else if (res.type === "error") {
+          toast.error(res.header, {
+            description: res.message,
+          });
+        }
+      });
+    });
   };
 
   const nextStep = async () => {
     const fields = getFieldsForStep(step);
+    console.log(`Current step: ${step}, Fields to validate:`, fields);
     const isValid = await form.trigger(fields);
+    console.log(`Validation result: ${isValid}`);
     if (isValid) {
-      setStep(step + 1);
+      if (step < totalSteps) {
+        setStep(step + 1);
+      } else {
+        console.log("Attempting to submit form");
+        form.handleSubmit(onSubmit)();
+      }
     }
   };
 
@@ -90,22 +145,17 @@ function NewKegiatanForm() {
           "tgl_pemeriksaan_selesai",
         ];
       case 2:
-        return ["NPWPD", "nama_wp"];
+        return ["NPWPD", "nama_wp", "jenis_pajak_id"];
       case 3:
-        return ["masa_pajak_awal", "masa_pajak_akhir"];
+        return ["jenis_pemeriksaan_id", "hasil_pemeriksaan_id", "tim_id"];
       case 4:
+        return ["masa_pajak_awal", "masa_pajak_akhir"];
+      case 5:
         return [
           "keterangan",
           "jumlah_kenaikan",
           "persentase_kenaikan",
           "estimasi_presentasi_kenaikan",
-        ];
-      case 5:
-        return [
-          "jenis_pajak_id",
-          "jenis_pemeriksaan_id",
-          "hasil_pemeriksaan_id",
-          "tim_id",
         ];
       default:
         return [];
@@ -114,7 +164,7 @@ function NewKegiatanForm() {
 
   return (
     <>
-      <div className="mb-4">
+      {/* <div className="mb-4">
         <div className="flex justify-between mb-2">
           <span>
             Step {step} of {totalSteps}
@@ -127,12 +177,14 @@ function NewKegiatanForm() {
             style={{ width: `${(step / totalSteps) * 100}%` }}
           ></div>
         </div>
-      </div>
+      </div> */}
+      <Progress value={(step / totalSteps) * 100} />
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="flex flex-col gap-4"
         >
+          {/* MARK: step 1 */}
           {step === 1 && (
             <>
               <FormField
@@ -191,7 +243,7 @@ function NewKegiatanForm() {
               )}
             </>
           )}
-
+          {/* MARK: step 2 */}
           {step === 2 && (
             <>
               <FormField
@@ -216,10 +268,158 @@ function NewKegiatanForm() {
                   </FormItem>
                 )}
               />
+              <FormField
+                name="jenis_pajak_id"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Jenis Pajak</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value?.toString()}
+                      disabled={isLoadingJenisPajak || errorJenisPajak}
+                    >
+                      <SelectTrigger>
+                        <SelectValue
+                          placeholder={
+                            isLoadingJenisPajak
+                              ? "Memuat data..."
+                              : "Pilih Jenis Pajak"
+                          }
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {dataJenisPajak.map((jenisPajak) => (
+                          <SelectItem
+                            key={jenisPajak.id}
+                            value={jenisPajak.id.toString()}
+                          >
+                            {jenisPajak.nama}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </>
           )}
 
+          {/* MARK: step 3 */}
+
           {step === 3 && (
+            <>
+              <FormField
+                name="jenis_pemeriksaan_id"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Jenis Pemeriksaan</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value?.toString()}
+                      disabled={
+                        isLoadingJenisPemeriksaan || errorJenisPemeriksaan
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue
+                          placeholder={
+                            isLoadingJenisPemeriksaan
+                              ? "Memuat data..."
+                              : "Pilih Jenis Pemeriksaan"
+                          }
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {dataJenisPemeriksaan.map((jenisPemeriksaan) => (
+                          <SelectItem
+                            key={jenisPemeriksaan.id}
+                            value={jenisPemeriksaan.id.toString()}
+                          >
+                            {jenisPemeriksaan.nama}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                name="hasil_pemeriksaan_id"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Hasil Pemeriksaan</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value?.toString()}
+                      disabled={
+                        isLoadingHasilPemeriksaan || errorHasilPemeriksaan
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue
+                          placeholder={
+                            isLoadingHasilPemeriksaan
+                              ? "Memuat data..."
+                              : "Pilih Hasil Pemeriksaan"
+                          }
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {dataHasilPemeriksaan.map((hasilPemeriksaan) => (
+                          <SelectItem
+                            key={hasilPemeriksaan.id}
+                            value={hasilPemeriksaan.id.toString()}
+                          >
+                            {hasilPemeriksaan.keterangan}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                name="tim_id"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Tim</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value?.toString()}
+                      disabled={isLoadingTim || errorTim}
+                    >
+                      <SelectTrigger>
+                        <SelectValue
+                          placeholder={
+                            isLoadingTim ? "Memuat data..." : "Pilih Tim"
+                          }
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {dataTim.map((tim) => (
+                          <SelectItem key={tim.id} value={tim.id.toString()}>
+                            {tim.nama}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </>
+          )}
+
+          {/* MARK: step 4 */}
+
+          {step === 4 && (
             <>
               <FormField
                 name="masa_pajak_awal"
@@ -245,7 +445,7 @@ function NewKegiatanForm() {
                     <CalendarSelect
                       field={field}
                       isFuture={false}
-                      minDate={new Date(form.watch("masa_pajak_awal"))}
+                      minDate={new Date(form.watch("masa_pajak_awal") ?? 0)}
                       isDisabled={!form.watch("masa_pajak_awal")}
                     />
                     <FormMessage />
@@ -255,7 +455,9 @@ function NewKegiatanForm() {
             </>
           )}
 
-          {step === 4 && (
+          {/* MARK: step 5 */}
+
+          {step === 5 && (
             <>
               <FormField
                 name="keterangan"
@@ -263,7 +465,7 @@ function NewKegiatanForm() {
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>Keterangan</FormLabel>
-                    <Input {...field} />
+                    <Textarea {...field} />
                     <FormMessage />
                   </FormItem>
                 )}
@@ -273,7 +475,7 @@ function NewKegiatanForm() {
                 control={form.control}
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Jumlah Kenaikan</FormLabel>
+                    <FormLabel>Jumlah Kenaikan (Rp)</FormLabel>
                     <Input {...field} type="number" />
                     <FormMessage />
                   </FormItem>
@@ -284,7 +486,7 @@ function NewKegiatanForm() {
                 control={form.control}
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Persentase Kenaikan</FormLabel>
+                    <FormLabel>Persentase Kenaikan (%)</FormLabel>
                     <Input {...field} type="number" />
                     <FormMessage />
                   </FormItem>
@@ -295,7 +497,7 @@ function NewKegiatanForm() {
                 control={form.control}
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Estimasi Presentasi Kenaikan</FormLabel>
+                    <FormLabel>Estimasi Presentasi Kenaikan (%)</FormLabel>
                     <Input {...field} type="number" />
                     <FormMessage />
                   </FormItem>
@@ -304,67 +506,31 @@ function NewKegiatanForm() {
             </>
           )}
 
-          {step === 5 && (
-            <>
-              <FormField
-                name="jenis_pajak_id"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Jenis Pajak</FormLabel>
-                    <Input {...field} />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                name="jenis_pemeriksaan_id"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Jenis Pemeriksaan</FormLabel>
-                    <Input {...field} />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                name="hasil_pemeriksaan_id"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Hasil Pemeriksaan</FormLabel>
-                    <Input {...field} />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                name="tim_id"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Tim</FormLabel>
-                    <Input {...field} />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </>
-          )}
-
-          <div className="flex justify-between mt-4">
+          <div
+            className={`flex w-full mt-4 ${
+              step > 1 ? "justify-between" : "justify-end"
+            }`}
+          >
             {step > 1 && (
-              <Button type="button" onClick={prevStep}>
-                Previous
+              <Button variant="outline" type="button" onClick={prevStep}>
+                Sebelumnya
               </Button>
             )}
-            {step < 5 ? (
+            {step < totalSteps ? (
               <Button type="button" onClick={nextStep}>
-                Next
+                Selanjutnya
               </Button>
             ) : (
-              <Button type="submit">Submit</Button>
+              <Button type="button" onClick={nextStep} disabled={isSubmiting}>
+                {isSubmiting ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Menambahkan...
+                  </div>
+                ) : (
+                  "Tambah"
+                )}
+              </Button>
             )}
           </div>
         </form>

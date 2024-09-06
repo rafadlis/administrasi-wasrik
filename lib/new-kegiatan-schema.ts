@@ -5,11 +5,11 @@ export const newKegiatanSchema = z
     tgl_pemeriksaan_mulai: z.date(),
     is_selesai: z.boolean(),
     tgl_pemeriksaan_selesai: z.date().optional(),
-    NPWPD: z.string().min(1),
+    NPWPD: z.string().min(1).optional(),
     nama_wp: z.string().min(1),
     jenis_pajak_id: z.coerce.number(),
-    masa_pajak_awal: z.date(),
-    masa_pajak_akhir: z.date(),
+    masa_pajak_awal: z.date().optional(),
+    masa_pajak_akhir: z.date().optional(),
     keterangan: z.string().optional(),
     jumlah_kenaikan: z.coerce.number().optional(),
     persentase_kenaikan: z.coerce.number().optional(),
@@ -31,19 +31,3 @@ export const newKegiatanSchema = z
       path: ["tgl_pemeriksaan_selesai"],
     }
   );
-
-// id                            Int      @id @default(autoincrement())
-//   tgl_pemeriksaan_mulai         DateTime?
-//   tgl_pemeriksaan_selesai       DateTime?
-//   NPWPD                         String?
-//   nama_wp                       String?
-//   masa_pajak_awal               DateTime?
-//   masa_pajak_akhir              DateTime?
-//   keterangan                    String?
-//   jumlah_kenaikan               Int?
-//   persentase_kenaikan           Float?
-//   estimasi_presentasi_kenaikan  Float?
-//   jenis_pajak_id                Int?
-//   jenis_pemeriksaan_id          Int?
-//   hasil_pemeriksaan_id          Int?
-//   tim_id                        Int?

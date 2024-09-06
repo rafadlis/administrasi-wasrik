@@ -1,4 +1,4 @@
-DELETE FROM "JenisPajak";
+DELETE FROM "JenisPemeriksaan";
 
 INSERT INTO "JenisPemeriksaan" (id, nama, "createdAt", "updatedAt") VALUES
 (1, 'Pemeriksaan Lapangan', now(), now()),
