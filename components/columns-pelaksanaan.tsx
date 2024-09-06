@@ -116,7 +116,6 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
       header: "Menu",
       cell: ({ row }) => {
         const data = row.original;
-        console.log(data);
         return (
           <div className="flex gap-2">
             <Button size="icon" variant="secondary" asChild>

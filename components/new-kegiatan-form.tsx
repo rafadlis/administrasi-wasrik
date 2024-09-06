@@ -117,14 +117,13 @@ function NewKegiatanForm({ onSuccess }: { onSuccess: () => void }) {
 
   const nextStep = async () => {
     const fields = getFieldsForStep(step);
-    console.log(`Current step: ${step}, Fields to validate:`, fields);
+
     const isValid = await form.trigger(fields);
-    console.log(`Validation result: ${isValid}`);
+
     if (isValid) {
       if (step < totalSteps) {
         setStep(step + 1);
       } else {
-        console.log("Attempting to submit form");
         form.handleSubmit(onSubmit)();
       }
     }
