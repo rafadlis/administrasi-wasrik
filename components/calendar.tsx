@@ -185,7 +185,6 @@ export function CalendarSelect({
             selected={selectedDate}
             onSelect={handleCalendarSelect}
             disabled={isDateDisabled}
-            initialFocus
             fixedWeeks
             month={selectedDate}
             onMonthChange={setSelectedDate}
