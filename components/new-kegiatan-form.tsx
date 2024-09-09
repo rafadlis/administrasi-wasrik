@@ -292,7 +292,7 @@ function NewKegiatanForm({ onSuccess }: { onSuccess: () => void }) {
                                 {daftarWP.map((wp) => (
                                   <CommandItem
                                     key={wp.ObyekBadanNo}
-                                    value={wp.ObyekBadanNo}
+                                    value={wp.NamaBadan}
                                     onSelect={() => {
                                       field.onChange(wp.ObyekBadanNo);
                                       form.setValue("nama_wp", wp.NamaBadan);
