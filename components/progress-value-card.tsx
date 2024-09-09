@@ -10,21 +10,33 @@ import {
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 
-export default function Component() {
+export default function ProgressValueCard({
+  title,
+  value,
+  description,
+  progressValue,
+  className,
+}: {
+  title: string;
+  value: number;
+  description: string;
+  progressValue: number | undefined | null;
+  className?: string;
+}) {
   return (
-    <Card>
+    <Card className={className}>
       <CardHeader className="pb-2">
-        <CardDescription>This Month</CardDescription>
-        <CardTitle className="text-4xl">$5,329</CardTitle>
+        <CardDescription>{title}</CardDescription>
+        <CardTitle className="text-4xl">{value}</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="text-xs text-muted-foreground">
-          +10% from last month
-        </div>
+        <div className="text-xs text-muted-foreground">{description}</div>
       </CardContent>
-      <CardFooter>
-        <Progress value={12} aria-label="12% increase" />
-      </CardFooter>
+      {progressValue || progressValue === 0 ? (
+        <CardFooter>
+          <Progress value={progressValue} />
+        </CardFooter>
+      ) : null}
     </Card>
   );
 }
