@@ -19,6 +19,25 @@ import { toast } from "sonner";
 export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
   [
     {
+      accessorKey: "terakhirDiubah",
+      header: "Terakhir Diubah",
+      cell: ({ row }) => {
+        const data = row.original;
+        return (
+          <div className="flex flex-col">
+            {data.updatedAt?.toLocaleDateString("id-ID", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+            })}
+            <span className="text-xs text-muted-foreground">
+              {data.updatedAt?.toLocaleTimeString("id-ID")}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
       accessorKey: "tanggalKegiatan",
       header: "Waktu Kegiatan",
       cell: ({ row }) => {
