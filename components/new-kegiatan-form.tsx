@@ -44,16 +44,32 @@ import {
 import { Textarea } from "./ui/textarea";
 import { toast } from "sonner";
 import { newKegiatan } from "@/lib/new-kegiatan";
-import { Loader2 } from "lucide-react";
+import { ChevronsUpDown, Loader2 } from "lucide-react";
 import { Progress } from "./ui/progress";
+import { cn } from "@/lib/utils";
+import { useDaftarWP } from "@/lib/get-from-epad-client";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { Check } from "lucide-react";
 
-export function NewKegiatanDialog() {
+export function NewKegiatanDialog({ className }: { className?: string }) {
   const [open, setOpen] = useState(false);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button onClick={() => setOpen(true)}>
+        <Button className={cn("", className)} onClick={() => setOpen(true)}>
           <PlusIcon className="w-4 h-4 mr-2" />
           Tambah Kegiatan
         </Button>
@@ -96,6 +112,7 @@ function NewKegiatanForm({ onSuccess }: { onSuccess: () => void }) {
     isLoadingHasilPemeriksaan,
   } = useHasilPemeriksaan();
   const { dataTim, errorTim, isLoadingTim } = useTim();
+  const { daftarWP, isLoadingDaftarWP, errorDaftarWP } = useDaftarWP();
 
   const [isSubmiting, submiting] = useTransition();
   const onSubmit = (data: z.infer<typeof newKegiatanSchema>) => {
@@ -163,20 +180,6 @@ function NewKegiatanForm({ onSuccess }: { onSuccess: () => void }) {
 
   return (
     <>
-      {/* <div className="mb-4">
-        <div className="flex justify-between mb-2">
-          <span>
-            Step {step} of {totalSteps}
-          </span>
-          <span>{Math.round((step / totalSteps) * 100)}% Complete</span>
-        </div>
-        <div className="w-full bg-gray-200 rounded-full h-2.5">
-          <div
-            className="bg-blue-600 h-2.5 rounded-full"
-            style={{ width: `${(step / totalSteps) * 100}%` }}
-          ></div>
-        </div>
-      </div> */}
       <Progress value={(step / totalSteps) * 100} />
       <Form {...form}>
         <form
@@ -194,7 +197,7 @@ function NewKegiatanForm({ onSuccess }: { onSuccess: () => void }) {
                     <FormLabel>Tanggal Mulai</FormLabel>
                     <CalendarSelect
                       field={field}
-                      isFuture={false}
+                      isFuture={true}
                       minDate={new Date(1, 1, 2022)}
                     />
                     <FormMessage />
@@ -209,7 +212,10 @@ function NewKegiatanForm({ onSuccess }: { onSuccess: () => void }) {
                     <FormControl>
                       <Switch
                         checked={field.value}
-                        onCheckedChange={field.onChange}
+                        onCheckedChange={(checked) => {
+                          field.onChange(checked);
+                          form.setValue("tgl_pemeriksaan_selesai", undefined);
+                        }}
                       />
                     </FormControl>
                     <div className="flex flex-col ">
@@ -246,15 +252,76 @@ function NewKegiatanForm({ onSuccess }: { onSuccess: () => void }) {
           {step === 2 && (
             <>
               <FormField
-                name="NPWPD"
                 control={form.control}
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>NPWPD</FormLabel>
-                    <Input {...field} />
-                    <FormMessage />
-                  </FormItem>
-                )}
+                name="NPWPD"
+                render={({ field }) => {
+                  return (
+                    <FormItem>
+                      <FormLabel>NPWPD</FormLabel>
+                      <Popover>
+                        <PopoverTrigger
+                          asChild
+                          disabled={isLoadingDaftarWP || errorDaftarWP}
+                        >
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={`w-full ${
+                                !field.value ? "text-muted-foreground" : ""
+                              }`}
+                            >
+                              <span>
+                                {isLoadingDaftarWP || errorDaftarWP
+                                  ? "Memuat..."
+                                  : field.value
+                                  ? daftarWP.find(
+                                      (wp) => wp.ObyekBadanNo === field.value
+                                    )?.ObyekBadanNo
+                                  : "Cari NPWPD"}
+                              </span>
+                              <ChevronsUpDown className="ml-auto h-4 w-4" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-full p-0">
+                          <Command>
+                            <CommandInput placeholder="Cari Provinsi" />
+                            <CommandList>
+                              <CommandEmpty>Tidak ditemukan</CommandEmpty>
+                              <CommandGroup className="">
+                                {daftarWP.map((wp) => (
+                                  <CommandItem
+                                    key={wp.ObyekBadanNo}
+                                    value={wp.ObyekBadanNo}
+                                    onSelect={() => {
+                                      field.onChange(wp.ObyekBadanNo);
+                                      form.setValue("nama_wp", wp.NamaBadan);
+                                    }}
+                                  >
+                                    <div className="flex flex-col">
+                                      <span>{wp.NamaBadan}</span>
+                                      <span className="text-xs text-muted-foreground">
+                                        {wp.ObyekBadanNo}
+                                      </span>
+                                    </div>
+                                    <Check
+                                      className={` ml-auto h-3 w-3 ${
+                                        field.value === wp.ObyekBadanNo
+                                          ? "opacity-100"
+                                          : "opacity-0"
+                                      }`}
+                                    />
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
               />
               <FormField
                 name="nama_wp"
