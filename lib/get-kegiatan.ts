@@ -45,6 +45,8 @@ export async function getDaftarKegiatanPemeriksaan() {
           },
         },
       },
+      createdAt: true,
+      updatedAt: true,
     },
   });
   return pelaksanaan;
