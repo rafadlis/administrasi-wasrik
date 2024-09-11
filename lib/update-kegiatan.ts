@@ -13,7 +13,9 @@ export async function updateKegiatanPemeriksaan(
       where: {
         id,
       },
-      data,
+      data: {
+        ...data,
+      },
     });
     revalidatePath("/");
     return {
