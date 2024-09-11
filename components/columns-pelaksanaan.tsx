@@ -55,8 +55,12 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
               })}
             </span>
             <span className="text-sm text-muted-foreground">
-              Sampai:{" "}
-              {data.tgl_pemeriksaan_selesai?.toLocaleTimeString("id-ID")}
+              s.d.{" "}
+              {data.tgl_pemeriksaan_selesai?.toLocaleDateString("id-ID", {
+                day: "2-digit",
+                month: "long",
+                year: "numeric",
+              })}
             </span>
           </div>
         );
@@ -83,21 +87,7 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
         );
       },
     },
-    {
-      accessorKey: "progress",
-      header: "Progress",
-      cell: ({ row }) => {
-        const data = row.original;
-        return (
-          <Badge
-            variant={data.progress?.nama !== "Selesai" ? "outline" : "default"}
-            className="capitalize"
-          >
-            {data.progress?.nama || "-"}
-          </Badge>
-        );
-      },
-    },
+
     {
       accessorKey: "tim",
       header: "Tim",
@@ -120,7 +110,19 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
       header: "Hasil Pemeriksaan",
       cell: ({ row }) => {
         const data = row.original;
-        return <span>{data.hasil_pemeriksaan?.keterangan}</span>;
+        return (
+          <Badge
+            variant={
+              data.progres_kegiatan?.some(
+                (progres) => progres.kategori_progres?.nama === "Selesai"
+              )
+                ? "default"
+                : "outline"
+            }
+          >
+            {data.hasil_pemeriksaan?.keterangan}
+          </Badge>
+        );
       },
     },
     {
@@ -146,7 +148,9 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
               <DropdownMenuContent>
                 <DropdownMenuItem
                   className="cursor-pointer"
-                  disabled={data.progress?.nama === "Selesai"}
+                  disabled={data.progres_kegiatan?.some(
+                    (progres) => progres.kategori_progres?.nama === "Selesai"
+                  )}
                   onClick={async () => {
                     await deleteKegiatan(data.id).then((res) => {
                       toast(res.header, {

@@ -338,7 +338,7 @@ function NewKegiatanForm({ onSuccess }: { onSuccess: () => void }) {
                 variant="outline"
                 type="button"
                 onClick={() => {
-                  form.resetField("NPWPD");
+                  form.setValue("NPWPD", "");
                   form.setValue("nama_wp", "");
                 }}
                 className="ml-auto"

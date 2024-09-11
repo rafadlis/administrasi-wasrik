@@ -35,7 +35,7 @@ export async function getTim() {
 }
 
 export async function getProgressPemeriksaan() {
-  const progressPemeriksaan = await db.progressPemeriksaan.findMany();
+  const progressPemeriksaan = await db.progresPemeriksaan.findMany();
   return progressPemeriksaan;
 }
 

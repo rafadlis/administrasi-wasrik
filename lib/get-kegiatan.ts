@@ -13,6 +13,9 @@ export type DaftarKegiatanNoRelationType = NonNullable<
 
 export async function getDaftarKegiatanPemeriksaan() {
   const pelaksanaan = await db.kegiatanPemeriksaan.findMany({
+    orderBy: {
+      updatedAt: "desc",
+    },
     select: {
       id: true,
       tgl_pemeriksaan_mulai: true,
@@ -20,10 +23,15 @@ export async function getDaftarKegiatanPemeriksaan() {
       jenis_pemeriksaan_id: true,
       nama_wp: true,
       NPWPD: true,
-      progress: {
+      progres_kegiatan: {
         select: {
           id: true,
-          nama: true,
+          kategori_progres: {
+            select: {
+              id: true,
+              nama: true,
+            },
+          },
         },
       },
       hasil_pemeriksaan: {
@@ -46,7 +54,9 @@ export async function getDaftarKegiatanPemeriksaan() {
             select: {
               petugas: {
                 select: {
+                  id: true,
                   panggilan: true,
+                  jabatan: true,
                 },
               },
             },
