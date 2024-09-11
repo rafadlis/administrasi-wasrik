@@ -54,6 +54,7 @@ export function SheetEditKegiatan({
   const { dataTim, isLoadingTim } = useTim();
 
   // MARK: Function
+  // BUG: if change one field, another field changed too, this is wrong
   const handleJenisPemeriksaanChange = async (value: string) => {
     await updateKegiatanPemeriksaan(data.id, {
       jenis_pemeriksaan_id: parseInt(value),
