@@ -20,19 +20,27 @@ export async function getDaftarKegiatanPemeriksaan() {
       jenis_pemeriksaan_id: true,
       nama_wp: true,
       NPWPD: true,
-      status: true,
+      progress: {
+        select: {
+          id: true,
+          nama: true,
+        },
+      },
       hasil_pemeriksaan: {
         select: {
+          id: true,
           keterangan: true,
         },
       },
       jenis_pemeriksaan: {
         select: {
+          id: true,
           nama: true,
         },
       },
       tim: {
         select: {
+          id: true,
           nama: true,
           anggota_tim: {
             select: {

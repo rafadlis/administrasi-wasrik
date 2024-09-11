@@ -34,6 +34,15 @@ export async function getTim() {
   return tim;
 }
 
+export async function getProgressPemeriksaan() {
+  const progressPemeriksaan = await db.progressPemeriksaan.findMany();
+  return progressPemeriksaan;
+}
+
+export type ProgressPemeriksaanType = NonNullable<
+  Awaited<ReturnType<typeof getProgressPemeriksaan>>
+>;
+
 export type TimType = NonNullable<Awaited<ReturnType<typeof getTim>>>;
 
 export async function getKategoriHasilPemeriksaan() {

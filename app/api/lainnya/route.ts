@@ -2,6 +2,7 @@ import {
   getHasilPemeriksaan,
   getJenisPajak,
   getJenisPemeriksaan,
+  getProgressPemeriksaan,
   getTim,
 } from "@/lib/get-other";
 import { headers } from "next/headers";
@@ -17,6 +18,11 @@ export async function GET() {
 
   if (whatData === "jenisPajak") {
     const data = await getJenisPajak();
+    return Response.json({ data });
+  }
+
+  if (whatData === "progressPemeriksaan") {
+    const data = await getProgressPemeriksaan();
     return Response.json({ data });
   }
 

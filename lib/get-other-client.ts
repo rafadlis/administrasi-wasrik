@@ -3,6 +3,7 @@ import {
   HasilPemeriksaanType,
   JenisPajakType,
   JenisPemeriksaanType,
+  ProgressPemeriksaanType,
   TimType,
 } from "./get-other";
 
@@ -58,5 +59,17 @@ export function useTim() {
     dataTim: data?.data || [],
     errorTim: error,
     isLoadingTim: isLoading,
+  };
+}
+
+export function useProgressPemeriksaan() {
+  const { data, error, isLoading } = useSWR<{ data: ProgressPemeriksaanType }>(
+    ["/api/lainnya", "progressPemeriksaan"],
+    ([url, whatData]) => fetcher(url, whatData as string)
+  );
+  return {
+    dataProgressPemeriksaan: data?.data || [],
+    errorProgressPemeriksaan: error,
+    isLoadingProgressPemeriksaan: isLoading,
   };
 }
