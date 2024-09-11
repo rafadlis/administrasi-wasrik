@@ -67,14 +67,7 @@ model KategoriHasilPemeriksaan {
   kegiatan_pemeriksaan KegiatanPemeriksaan[]
 }
 
-model ProgressPemeriksaan {
-  id         Int      @id @default(autoincrement())
-  nama       String
-  keterangan String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  kegiatan_pemeriksaan KegiatanPemeriksaan[]
-}
+
 
 model KegiatanPemeriksaan {
   id                            Int      @id @default(autoincrement())
@@ -82,9 +75,6 @@ model KegiatanPemeriksaan {
   tgl_pemeriksaan_selesai       DateTime?
   NPWPD                         String?
   nama_wp                       String?
-  nomor_surat_tugas            String?
-  tgl_surat_tugas              DateTime?
-  progress_id                  Int?
   masa_pajak_awal               DateTime?
   masa_pajak_akhir              DateTime?
   keterangan                    String? @db.Text
@@ -99,7 +89,29 @@ model KegiatanPemeriksaan {
   jenis_pemeriksaan             JenisPemeriksaan?         @relation(fields: [jenis_pemeriksaan_id], references: [id])
   hasil_pemeriksaan             KategoriHasilPemeriksaan? @relation(fields: [hasil_pemeriksaan_id], references: [id])
   tim                           Tim?                      @relation(fields: [tim_id], references: [id])
-  progress                      ProgressPemeriksaan?      @relation(fields: [progress_id], references: [id])
+  progres_kegiatan             ProgresPemeriksaan[]
   createdAt                     DateTime @default(now())
   updatedAt                     DateTime @updatedAt
+}
+
+model KategoriProgresKegiatan {
+  id         Int      @id @default(autoincrement())
+  nama       String
+  keterangan String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  progres_kegiatan ProgresPemeriksaan[]
+}
+
+model ProgresPemeriksaan {
+  id        Int      @id @default(autoincrement())
+  kegiatan_id Int
+  kategori_progres_id Int
+  nomor_surat String?
+  tanggal_surat DateTime?
+  keterangan String? @db.Text
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  kategori_progres KategoriProgresKegiatan? @relation(fields: [kategori_progres_id], references: [id])
+  kegiatan_pemeriksaan KegiatanPemeriksaan? @relation(fields: [kegiatan_id], references: [id])
 }
