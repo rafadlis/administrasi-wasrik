@@ -17,6 +17,8 @@ import { deleteKegiatan, undoDeleteKegiatan } from "@/lib/new-kegiatan";
 import { toast } from "sonner";
 import { SheetEditKegiatan } from "./sheet-edit-kegiatan";
 
+// TODO: tambah Progress: SP, ST, BA Pertemuan, BAHP, LHP
+// TODO: tambah hasil: skpdkb, Nota Dinas, Bimbingan
 export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
   [
     {

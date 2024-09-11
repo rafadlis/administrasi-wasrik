@@ -572,6 +572,8 @@ function NewKegiatanForm({ onSuccess }: { onSuccess: () => void }) {
             </>
           )}
 
+          {/* MARK: Button */}
+
           <div
             className={`flex w-full mt-4 ${
               step > 1 ? "justify-between" : "justify-end"
