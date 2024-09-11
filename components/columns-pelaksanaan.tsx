@@ -15,6 +15,7 @@ import Link from "next/link";
 import { Ellipsis, FolderOpen } from "lucide-react";
 import { deleteKegiatan, undoDeleteKegiatan } from "@/lib/new-kegiatan";
 import { toast } from "sonner";
+import { SheetEditKegiatan } from "./sheet-edit-kegiatan";
 
 export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
   [
@@ -142,6 +143,8 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
                 <FolderOpen className="w-4 h-4" />
               </Link>
             </Button>
+            <SheetEditKegiatan data={data} />
+            {/* MARK: Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button size="icon" variant="secondary">
