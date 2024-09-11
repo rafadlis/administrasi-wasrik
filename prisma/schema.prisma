@@ -67,10 +67,13 @@ model KategoriHasilPemeriksaan {
   kegiatan_pemeriksaan KegiatanPemeriksaan[]
 }
 
-enum StatusPemeriksaan {
-  PROSES
-  BATAL
-  SELESAI
+model ProgressPemeriksaan {
+  id         Int      @id @default(autoincrement())
+  nama       String
+  keterangan String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  kegiatan_pemeriksaan KegiatanPemeriksaan[]
 }
 
 model KegiatanPemeriksaan {
@@ -81,9 +84,10 @@ model KegiatanPemeriksaan {
   nama_wp                       String?
   nomor_surat_tugas            String?
   tgl_surat_tugas              DateTime?
+  progress_id                  Int?
   masa_pajak_awal               DateTime?
   masa_pajak_akhir              DateTime?
-  keterangan                    String?
+  keterangan                    String? @db.Text
   jumlah_kenaikan               Int?
   persentase_kenaikan           Float?
   estimasi_presentasi_kenaikan  Float?
@@ -95,7 +99,7 @@ model KegiatanPemeriksaan {
   jenis_pemeriksaan             JenisPemeriksaan?         @relation(fields: [jenis_pemeriksaan_id], references: [id])
   hasil_pemeriksaan             KategoriHasilPemeriksaan? @relation(fields: [hasil_pemeriksaan_id], references: [id])
   tim                           Tim?                      @relation(fields: [tim_id], references: [id])
-  status                        StatusPemeriksaan         @default(PROSES)
+  progress                      ProgressPemeriksaan?      @relation(fields: [progress_id], references: [id])
   createdAt                     DateTime @default(now())
   updatedAt                     DateTime @updatedAt
 }
