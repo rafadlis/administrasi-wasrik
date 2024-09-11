@@ -84,26 +84,16 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
       },
     },
     {
-      accessorKey: "status",
-      header: "Status",
+      accessorKey: "progress",
+      header: "Progress",
       cell: ({ row }) => {
         const data = row.original;
         return (
           <Badge
-            variant={
-              data.status === "PROSES"
-                ? "outline"
-                : data.status === "BATAL"
-                ? "destructive"
-                : "default"
-            }
+            variant={data.progress?.nama !== "Selesai" ? "outline" : "default"}
             className="capitalize"
           >
-            {data.status === "PROSES"
-              ? "Proses"
-              : data.status === "BATAL"
-              ? "Dibatalkan"
-              : "Selesai"}
+            {data.progress?.nama || "-"}
           </Badge>
         );
       },
@@ -156,9 +146,7 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
               <DropdownMenuContent>
                 <DropdownMenuItem
                   className="cursor-pointer"
-                  disabled={
-                    data.status === "BATAL" || data.status === "SELESAI"
-                  }
+                  disabled={data.progress?.nama === "Selesai"}
                   onClick={async () => {
                     await deleteKegiatan(data.id).then((res) => {
                       toast(res.header, {

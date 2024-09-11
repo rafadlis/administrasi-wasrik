@@ -6,7 +6,7 @@ export const newKegiatanSchema = z
     is_selesai: z.boolean(),
     tgl_pemeriksaan_selesai: z.date().optional(),
     NPWPD: z.string().min(1).optional(),
-    nama_wp: z.string().min(1),
+    nama_wp: z.string().min(3),
     jenis_pajak_id: z.coerce.number(),
     masa_pajak_awal: z.date().optional(),
     masa_pajak_akhir: z.date().optional(),

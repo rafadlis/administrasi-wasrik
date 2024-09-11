@@ -301,7 +301,7 @@ function NewKegiatanForm({ onSuccess }: { onSuccess: () => void }) {
                                     <div className="flex flex-col">
                                       <span>{wp.NamaBadan}</span>
                                       <span className="text-xs text-muted-foreground">
-                                        {wp.ObyekBadanNo}
+                                        {wp.ObyekBadanNo}, {wp.AlamatBadan}
                                       </span>
                                     </div>
                                     <Check
@@ -334,6 +334,17 @@ function NewKegiatanForm({ onSuccess }: { onSuccess: () => void }) {
                   </FormItem>
                 )}
               />
+              <Button
+                variant="outline"
+                type="button"
+                onClick={() => {
+                  form.resetField("NPWPD");
+                  form.setValue("nama_wp", "");
+                }}
+                className="ml-auto"
+              >
+                Batal Pilih WP
+              </Button>
               <FormField
                 name="jenis_pajak_id"
                 control={form.control}
@@ -580,7 +591,7 @@ function NewKegiatanForm({ onSuccess }: { onSuccess: () => void }) {
             }`}
           >
             {step > 1 && (
-              <Button variant="outline" type="button" onClick={prevStep}>
+              <Button variant="secondary" type="button" onClick={prevStep}>
                 Sebelumnya
               </Button>
             )}
