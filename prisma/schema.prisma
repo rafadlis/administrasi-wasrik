@@ -94,7 +94,7 @@ model KegiatanPemeriksaan {
   updatedAt                     DateTime @updatedAt
 }
 
-model KategoriProgresKegiatan {
+model KategoriProgresPemeriksaan {
   id         Int      @id @default(autoincrement())
   nama       String
   keterangan String?
@@ -105,13 +105,13 @@ model KategoriProgresKegiatan {
 
 model ProgresPemeriksaan {
   id        Int      @id @default(autoincrement())
-  kegiatan_id Int
+  kegiatan_pemeriksaan_id Int
   kategori_progres_id Int
   nomor_surat String?
   tanggal_surat DateTime?
   keterangan String? @db.Text
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-  kategori_progres KategoriProgresKegiatan? @relation(fields: [kategori_progres_id], references: [id])
-  kegiatan_pemeriksaan KegiatanPemeriksaan? @relation(fields: [kegiatan_id], references: [id])
+  kategori_progres KategoriProgresPemeriksaan? @relation(fields: [kategori_progres_id], references: [id])
+  kegiatan_pemeriksaan KegiatanPemeriksaan? @relation(fields: [kegiatan_pemeriksaan_id], references: [id])
 }
