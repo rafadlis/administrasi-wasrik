@@ -32,6 +32,11 @@ export async function getDaftarKegiatanPemeriksaan() {
               nama: true,
             },
           },
+          tanggal_surat: true,
+          nomor_surat: true,
+          keterangan: true,
+          createdAt: true,
+          updatedAt: true,
         },
       },
       hasil_pemeriksaan: {

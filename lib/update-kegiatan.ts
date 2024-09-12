@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { KegiatanPemeriksaan } from "@prisma/client";
+import { KegiatanPemeriksaan, ProgresPemeriksaan } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 export async function updateKegiatanPemeriksaan(
@@ -28,6 +28,33 @@ export async function updateKegiatanPemeriksaan(
     return {
       header: "Gagal",
       message: "Kegiatan gagal diupdate",
+      type: "error",
+    };
+  }
+}
+
+export async function updateProgresPemeriksaan(
+  id: number,
+  data: Partial<ProgresPemeriksaan>
+) {
+  try {
+    const updatedData = await db.progresPemeriksaan.update({
+      where: { id },
+      data: {
+        ...data,
+      },
+    });
+    revalidatePath("/");
+    return {
+      header: "Berhasil",
+      message: "Progres berhasil diupdate",
+      type: "success",
+      updatedData,
+    };
+  } catch (error) {
+    return {
+      header: "Gagal",
+      message: "Progres gagal diupdate",
       type: "error",
     };
   }
