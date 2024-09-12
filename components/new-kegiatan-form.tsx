@@ -114,6 +114,7 @@ function NewKegiatanForm({ onSuccess }: { onSuccess: () => void }) {
   const { dataTim, errorTim, isLoadingTim } = useTim();
   const { daftarWP, isLoadingDaftarWP, errorDaftarWP } = useDaftarWP();
 
+  // MARK: submit
   const [isSubmiting, submiting] = useTransition();
   const onSubmit = (data: z.infer<typeof newKegiatanSchema>) => {
     submiting(() => {
