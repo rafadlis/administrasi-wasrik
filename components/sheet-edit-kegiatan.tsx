@@ -53,88 +53,6 @@ export function SheetEditKegiatan({
     useHasilPemeriksaan();
   const { dataTim, isLoadingTim } = useTim();
 
-  // MARK: Function
-  // BUG: if change one field, another field changed too, this is wrong
-  const handleJenisPemeriksaanChange = async (value: string) => {
-    await updateKegiatanPemeriksaan(data.id, {
-      jenis_pemeriksaan_id: parseInt(value),
-    }).then((res) => {
-      if (res.type === "success") {
-        toast.success(res.header, {
-          description: res.message,
-        });
-      } else {
-        toast.error(res.header, {
-          description: res.message,
-        });
-      }
-    });
-  };
-
-  const handleHasilPemeriksaanChange = async (value: string) => {
-    await updateKegiatanPemeriksaan(data.id, {
-      hasil_pemeriksaan_id: parseInt(value),
-    }).then((res) => {
-      if (res.type === "success") {
-        toast.success(res.header, {
-          description: res.message,
-        });
-      } else {
-        toast.error(res.header, {
-          description: res.message,
-        });
-      }
-    });
-  };
-
-  const handleTimChange = async (value: string) => {
-    await updateKegiatanPemeriksaan(data.id, {
-      tim_id: parseInt(value),
-    }).then((res) => {
-      if (res.type === "success") {
-        toast.success(res.header, {
-          description: res.message,
-        });
-      } else {
-        toast.error(res.header, {
-          description: res.message,
-        });
-      }
-    });
-  };
-
-  const handleTanggalAwalChange = async (value: string) => {
-    await updateKegiatanPemeriksaan(data.id, {
-      tgl_pemeriksaan_mulai: new Date(value),
-    }).then((res) => {
-      if (res.type === "success") {
-        toast.success(res.header, {
-          description: res.message,
-        });
-      } else {
-        toast.error(res.header, {
-          description: res.message,
-        });
-      }
-    });
-  };
-
-  const handleTanggalAkhirChange = async (value: string) => {
-    await updateKegiatanPemeriksaan(data.id, {
-      tgl_pemeriksaan_selesai: new Date(value),
-    }).then((res) => {
-      if (res.type === "success") {
-        toast.success(res.header, {
-          description: res.message,
-        });
-      } else {
-        toast.error(res.header, {
-          description: res.message,
-        });
-      }
-    });
-  };
-
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -169,7 +87,21 @@ export function SheetEditKegiatan({
                     ? data.tgl_pemeriksaan_mulai.toISOString().split("T")[0]
                     : ""
                 }
-                onChange={(e) => handleTanggalAwalChange(e.target.value)}
+                onChange={async (e) =>
+                  await updateKegiatanPemeriksaan(data.id, {
+                    tgl_pemeriksaan_mulai: new Date(e.target.value),
+                  }).then((res) => {
+                    if (res.type === "success") {
+                      toast.success(res.header, {
+                        description: res.message,
+                      });
+                    } else {
+                      toast.error(res.header, {
+                        description: res.message,
+                      });
+                    }
+                  })
+                }
               />
               <Label>Tanggal Akhir</Label>
               <Input
@@ -179,14 +111,42 @@ export function SheetEditKegiatan({
                     ? data.tgl_pemeriksaan_selesai.toISOString().split("T")[0]
                     : ""
                 }
-                onChange={(e) => handleTanggalAkhirChange(e.target.value)}
+                onChange={async (e) =>
+                  await updateKegiatanPemeriksaan(data.id, {
+                    tgl_pemeriksaan_selesai: new Date(e.target.value),
+                  }).then((res) => {
+                    if (res.type === "success") {
+                      toast.success(res.header, {
+                        description: res.message,
+                      });
+                    } else {
+                      toast.error(res.header, {
+                        description: res.message,
+                      });
+                    }
+                  })
+                }
               />
             </fieldset>
             <fieldset className="flex flex-col gap-2">
               <Label>Jenis Pemeriksaan</Label>
               <Select
                 value={data.jenis_pemeriksaan_id?.toString() ?? ""}
-                onValueChange={handleJenisPemeriksaanChange}
+                onValueChange={async (value) =>
+                  await updateKegiatanPemeriksaan(data.id, {
+                    jenis_pemeriksaan_id: parseInt(value),
+                  }).then((res) => {
+                    if (res.type === "success") {
+                      toast.success(res.header, {
+                        description: res.message,
+                      });
+                    } else {
+                      toast.error(res.header, {
+                        description: res.message,
+                      });
+                    }
+                  })
+                }
               >
                 <SelectTrigger disabled={isLoadingJenisPemeriksaan}>
                   <SelectValue
@@ -215,7 +175,21 @@ export function SheetEditKegiatan({
               <Label>Tim</Label>
               <Select
                 value={data.tim?.id?.toString() ?? ""}
-                onValueChange={handleTimChange}
+                onValueChange={async (value) =>
+                  await updateKegiatanPemeriksaan(data.id, {
+                    tim_id: parseInt(value),
+                  }).then((res) => {
+                    if (res.type === "success") {
+                      toast.success(res.header, {
+                        description: res.message,
+                      });
+                    } else {
+                      toast.error(res.header, {
+                        description: res.message,
+                      });
+                    }
+                  })
+                }
               >
                 <SelectTrigger disabled={isLoadingTim}>
                   <SelectValue
@@ -263,7 +237,21 @@ export function SheetEditKegiatan({
               <Label>Hasil Pemeriksaan</Label>
               <Select
                 value={data.hasil_pemeriksaan?.id?.toString() ?? ""}
-                onValueChange={handleHasilPemeriksaanChange}
+                onValueChange={async (value) =>
+                  await updateKegiatanPemeriksaan(data.id, {
+                    hasil_pemeriksaan_id: parseInt(value),
+                  }).then((res) => {
+                    if (res.type === "success") {
+                      toast.success(res.header, {
+                        description: res.message,
+                      });
+                    } else {
+                      toast.error(res.header, {
+                        description: res.message,
+                      });
+                    }
+                  })
+                }
               >
                 <SelectTrigger disabled={isLoadingHasilPemeriksaan}>
                   <SelectValue
