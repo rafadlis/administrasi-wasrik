@@ -181,6 +181,7 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
                               year: "numeric",
                             })}
                           </TableCell>
+                          {/* MARK: kategori */}
                           <TableCell>
                             <div className="flex items-center gap-2">
                               <div className="relative">
@@ -202,16 +203,11 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
                               <div>{progres.kategori_progres?.nama}</div>
                             </div>
                           </TableCell>
+                          {/* MARK: NS */}
                           <TableCell>
                             <Popover>
-                              <PopoverTrigger asChild>
-                                <Button
-                                  type="button"
-                                  size="sm"
-                                  variant="outline"
-                                >
-                                  {progres.nomor_surat || "kosong"}
-                                </Button>
+                              <PopoverTrigger className="hover:underline underline-offset-4">
+                                {progres.nomor_surat || "kosong"}
                               </PopoverTrigger>
                               <PopoverContent>
                                 <form
@@ -251,16 +247,38 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
                               </PopoverContent>
                             </Popover>
                           </TableCell>
+                          {/* MARK: TS */}
                           <TableCell>
-                            {progres.tanggal_surat?.toLocaleDateString(
-                              "id-ID",
-                              {
-                                day: "2-digit",
-                                month: "2-digit",
-                                year: "numeric",
-                              }
-                            )}
+                            <Popover>
+                              <PopoverTrigger
+                                className={`hover:underline underline-offset-4 ${
+                                  progres.tanggal_surat
+                                    ? ""
+                                    : "text-muted-foreground"
+                                }`}
+                              >
+                                {progres.tanggal_surat?.toLocaleDateString(
+                                  "id-ID",
+                                  {
+                                    day: "2-digit",
+                                    month: "2-digit",
+                                    year: "numeric",
+                                  }
+                                ) || "kosong"}
+                              </PopoverTrigger>
+                              <PopoverContent>
+                                <Label>Tanggal Surat</Label>
+                                <Input
+                                  id="tanggal_surat"
+                                  name="tanggal_surat"
+                                  type="date"
+                                  placeholder="Masukkan Tanggal Surat"
+                                />
+                                <Button type="submit">Simpan</Button>
+                              </PopoverContent>
+                            </Popover>
                           </TableCell>
+                          {/* MARK: Dokumen */}
                           <TableCell>{progres.keterangan}</TableCell>
                         </TableRow>
                       ))}
@@ -269,7 +287,6 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
               </PopoverContent>
             </Popover>
             <SheetEditKegiatan data={data} />
-
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button size="icon" variant="secondary">
