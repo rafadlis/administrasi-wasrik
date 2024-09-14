@@ -442,7 +442,7 @@ model KegiatanPemeriksaan {
   hasil_pemeriksaan_id         Int?
   tim_id                       Int?
   createdAt                    DateTime                  @default(now())
-  updatedAt                    DateTime
+  updatedAt                    DateTime                  @default(now())
   KategoriHasilPemeriksaan     KategoriHasilPemeriksaan? @relation(fields: [hasil_pemeriksaan_id], references: [id])
   JenisPajak                   JenisPajak?               @relation(fields: [jenis_pajak_id], references: [id])
   JenisPemeriksaan             JenisPemeriksaan?         @relation(fields: [jenis_pemeriksaan_id], references: [id])
@@ -461,7 +461,7 @@ model ProgresPemeriksaan {
   tanggal_surat              DateTime?
   keterangan                 String?
   createdAt                  DateTime                   @default(now())
-  updatedAt                  DateTime
+  updatedAt                  DateTime                   @default(now())
   KategoriProgresPemeriksaan KategoriProgresPemeriksaan @relation(fields: [kategori_progres_id], references: [id])
   KegiatanPemeriksaan        KegiatanPemeriksaan        @relation(fields: [kegiatan_pemeriksaan_id], references: [id])
 
@@ -472,7 +472,7 @@ model TimPemeriksaan {
   id                    Int                     @id @default(autoincrement())
   nama                  String
   createdAt             DateTime                @default(now())
-  updatedAt             DateTime
+  updatedAt             DateTime                @default(now())
   AnggotaTimPemeriksaan AnggotaTimPemeriksaan[]
   KegiatanPemeriksaan   KegiatanPemeriksaan[]
 
@@ -492,7 +492,7 @@ model Badan {
   createdAt           DateTime          @default(now())
   nama_badan          String
   nomor_urut          Int               @default(autoincrement())
-  updatedAt           DateTime
+  updatedAt           DateTime          @default(now())
   InformasiKontak     InformasiKontak[]
   PengurusBadan       PengurusBadan[]
   WajibPajak          WajibPajak[]

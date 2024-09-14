@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE "Employee" ALTER COLUMN "NIP" DROP NOT NULL;
