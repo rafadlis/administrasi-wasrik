@@ -1,117 +1,736 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-}
-model Petugas {
-  id        Int      @id @default(autoincrement())
-  nama      String
-  panggilan String?
-  jabatan   String?
-  NIP       String?
-  NIK       String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  anggota_tim AnggotaTim[]
+  schemas  = ["pajak_admin", "pajak_general", "pajak_surat", "pajak_wasrik", "public"]
 }
 
-model AnggotaTim {
-  id        Int      @id @default(autoincrement())
-  petugas_id Int
-  tim_id Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  petugas   Petugas  @relation(fields: [petugas_id], references: [id])
-  tim       Tim      @relation(fields: [tim_id], references: [id])
+model DataReklame {
+  id                        Int              @id @default(autoincrement())
+  objek_pajak_id            Int
+  is_reklame_pihak_ketiga   Boolean
+  is_nilai_kontrak_wajar    Boolean?
+  nilai_kontrak             BigInt?
+  jenis_reklame_id          Int
+  klasifikasi_ruang_id      Int
+  klasifikasi_jalan_id      Int
+  klasifikasi_sudut_id      Int
+  waktu_penayangan          DateTime
+  waktu_penayangan_berhenti DateTime
+  jumlah                    Int
+  ukuran_media              Int
+  tinggi_media              Int
+  is_nama_pengenal          Boolean
+  is_lembaga_pendidikan     Boolean
+  keterangan_lain           String?
+  createdAt                 DateTime         @default(now())
+  updatedAt                 DateTime
+  JenisReklame              JenisReklame     @relation(fields: [jenis_reklame_id], references: [id])
+  KlasifikasiJalan          KlasifikasiJalan @relation(fields: [klasifikasi_jalan_id], references: [id])
+  KlasifikasiRuang          KlasifikasiRuang @relation(fields: [klasifikasi_ruang_id], references: [id])
+  KlasifikasiSudut          KlasifikasiSudut @relation(fields: [klasifikasi_sudut_id], references: [id])
+  ObjekPajak                ObjekPajak       @relation(fields: [objek_pajak_id], references: [id])
+
+  @@schema("pajak_admin")
 }
 
-model Tim {
-  id                 Int      @id @default(autoincrement())
-  nama               String
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
-  anggota_tim       AnggotaTim[]
-  kegiatan_pemeriksaan KegiatanPemeriksaan[]
+model JenisReklame {
+  id                       Int                        @id @default(autoincrement())
+  nama                     String
+  lama_masa                String?
+  harga_dasar_ketinggian   Int
+  parent_id                Int?
+  createdAt                DateTime                   @default(now())
+  updatedAt                DateTime
+  DataReklame              DataReklame[]
+  JenisReklame             JenisReklame?              @relation("JenisReklameToJenisReklame", fields: [parent_id], references: [id])
+  other_JenisReklame       JenisReklame[]             @relation("JenisReklameToJenisReklame")
+  Reklame_HargaDasarUkuran Reklame_HargaDasarUkuran[]
+
+  @@schema("pajak_admin")
+}
+
+model JurnalDebit {
+  id                        Int                        @id @default(autoincrement())
+  objek_pajak_id            Int
+  akun_objek_id             String
+  akun_rincian_objek_id     String?
+  akun_sub_rincian_objek_id String?
+  debit                     BigInt?
+  keterangan                String?
+  TerbayarAt                DateTime
+  createdAt                 DateTime                   @default(now())
+  updatedAt                 DateTime
+  kode_bayar_id             String
+  BaganAkun_Objek           BaganAkun_Objek            @relation(fields: [akun_objek_id], references: [id])
+  BaganAkun_RincianObjek    BaganAkun_RincianObjek?    @relation(fields: [akun_rincian_objek_id], references: [id])
+  BaganAkun_SubRincianObjek BaganAkun_SubRincianObjek? @relation(fields: [akun_sub_rincian_objek_id], references: [id])
+  KodeBayar                 KodeBayar                  @relation(fields: [kode_bayar_id], references: [id])
+  ObjekPajak                ObjekPajak                 @relation(fields: [objek_pajak_id], references: [id])
+  JurnalKredit              JurnalKredit[]
+
+  @@schema("pajak_admin")
+}
+
+model JurnalKredit {
+  id                        Int                        @id @default(autoincrement())
+  jurnal_debit_id           Int
+  akun_objek_id             String
+  akun_rincian_objek_id     String?
+  akun_sub_rincian_objek_id String?
+  kredit                    BigInt?
+  keterangan                String?
+  createdAt                 DateTime                   @default(now())
+  updatedAt                 DateTime
+  BaganAkun_Objek           BaganAkun_Objek            @relation(fields: [akun_objek_id], references: [id])
+  BaganAkun_RincianObjek    BaganAkun_RincianObjek?    @relation(fields: [akun_rincian_objek_id], references: [id])
+  BaganAkun_SubRincianObjek BaganAkun_SubRincianObjek? @relation(fields: [akun_sub_rincian_objek_id], references: [id])
+  JurnalDebit               JurnalDebit                @relation(fields: [jurnal_debit_id], references: [id])
+
+  @@schema("pajak_admin")
+}
+
+model KlasifikasiJalan {
+  id          Int           @id @default(autoincrement())
+  nama        String
+  skor        Int
+  skor_bobot  Float
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime
+  DataReklame DataReklame[]
+
+  @@schema("pajak_admin")
+}
+
+model KlasifikasiRuang {
+  id          Int           @id @default(autoincrement())
+  nama        String
+  skor        Int
+  skor_bobot  Float
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime
+  DataReklame DataReklame[]
+
+  @@schema("pajak_admin")
+}
+
+model KlasifikasiSudut {
+  id          Int           @id @default(autoincrement())
+  nama        String
+  skor        Int
+  skor_bobot  Float
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime
+  DataReklame DataReklame[]
+
+  @@schema("pajak_admin")
+}
+
+model KodeBayar {
+  id             String          @id
+  npwpd          String
+  jenis_pajak_id Int
+  masa_awal      DateTime
+  masa_akhir     DateTime?
+  nominal        BigInt
+  objek_pajak_id Int
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime
+  kadaluarsa     DateTime
+  terbayar       DateTime?
+  nominal_sanksi BigInt?
+  terbayar_id    String?
+  surat_id       Int?
+  JurnalDebit    JurnalDebit[]
+  JenisPajak     JenisPajak      @relation(fields: [jenis_pajak_id], references: [id])
+  ObjekPajak     ObjekPajak      @relation(fields: [objek_pajak_id], references: [id])
+  Surat          Surat?          @relation(fields: [surat_id], references: [id])
+  RiwayatSetoran RiwayatSetoran? @relation(fields: [terbayar_id], references: [id])
+  SKPD           SKPD[]
+  SPTPD          SPTPD[]
+
+  @@schema("pajak_admin")
+}
+
+model KritikSaran {
+  id           Int      @id @default(autoincrement())
+  user_id      String
+  subjek       String
+  deskripsi    String
+  upvoteUser   Json?
+  donwvoteUser Json?
+  status       String?
+  createAt     DateTime @default(now())
+  updateAt     DateTime
+
+  @@schema("pajak_admin")
+}
+
+model LaporMasalah {
+  id           Int      @id @default(autoincrement())
+  user_id      String
+  subjek       String
+  deskripsi    String
+  upvoteUser   Json?
+  donwvoteUser Json?
+  status       String?
+  createAt     DateTime @default(now())
+  updateAt     DateTime
+
+  @@schema("pajak_admin")
+}
+
+model Reklame_HargaDasarNilaiStrategis {
+  id          Int      @id @default(autoincrement())
+  nilai_bawah Int?
+  nilai_atas  Int?
+  harga_dasar BigInt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime
+
+  @@schema("pajak_admin")
+}
+
+model Reklame_HargaDasarUkuran {
+  id               Int          @id @default(autoincrement())
+  jenis_reklame_id Int
+  is_per_satuan    Boolean
+  satuan           String
+  nilai_bawah      Int?
+  nilai_atas       Int?
+  harga_dasar      BigInt
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime
+  JenisReklame     JenisReklame @relation(fields: [jenis_reklame_id], references: [id])
+
+  @@schema("pajak_admin")
+}
+
+model RiwayatSetoran {
+  id             String      @id
+  kode_bayar_id  String?
+  referensi_lain String?
+  nominal        BigInt
+  createAt       DateTime    @default(now())
+  updateAt       DateTime
+  KodeBayar      KodeBayar[]
+
+  @@schema("pajak_admin")
+}
+
+model InformasiKontak {
+  id               Int           @id @default(autoincrement())
+  badan_id         String?
+  orang_pribadi_id String?
+  email            String?
+  nomor_hp         String?
+  status           String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime
+  Badan            Badan?        @relation(fields: [badan_id], references: [id])
+  OrangPribadi     OrangPribadi? @relation(fields: [orang_pribadi_id], references: [id])
+
+  @@schema("pajak_general")
 }
 
 model JenisPajak {
-  id        Int      @id @default(autoincrement())
-  nama      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  kegiatan_pemeriksaan KegiatanPemeriksaan[]
+  id                        Int                   @id @default(autoincrement())
+  nama                      String
+  nomor_rekening_pendapatan String?
+  periode_masa              String?
+  kode_pajak                String?
+  hitung_sendiri            Boolean?
+  tarif                     Float?
+  KodeBayar                 KodeBayar[]
+  ObjekPajak                ObjekPajak[]
+  KegiatanPemeriksaan       KegiatanPemeriksaan[]
+
+  @@schema("pajak_general")
+}
+
+model ObjekPajak {
+  id                  Int           @id @default(autoincrement())
+  nomor_objek_pajak   String?
+  wajib_pajak_id      Int
+  jenis_pajak_id      Int?
+  nama_unik           String?
+  terhapus            DateTime?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime
+  RT                  String
+  RW                  String
+  alamat              String
+  kode_desa_kelurahan String
+  kode_kabupaten      String
+  kode_kecamatan      String
+  kode_provinsi       String
+  koordinat           String?
+  DataReklame         DataReklame[]
+  JurnalDebit         JurnalDebit[]
+  KodeBayar           KodeBayar[]
+  JenisPajak          JenisPajak?   @relation(fields: [jenis_pajak_id], references: [id])
+  Provinsi            Provinsi      @relation(fields: [kode_provinsi], references: [kode_provinsi])
+  Kabupaten           Kabupaten     @relation(fields: [kode_provinsi, kode_kabupaten], references: [kode_provinsi, kode_kabupaten])
+  Kecamatan           Kecamatan     @relation(fields: [kode_provinsi, kode_kabupaten, kode_kecamatan], references: [kode_provinsi, kode_kabupaten, kode_kecamatan])
+  DesaKelurahan       DesaKelurahan @relation(fields: [kode_provinsi, kode_kabupaten, kode_kecamatan, kode_desa_kelurahan], references: [kode_provinsi, kode_kabupaten, kode_kecamatan, kode_desa_kelurahan])
+  WajibPajak          WajibPajak    @relation(fields: [wajib_pajak_id], references: [id])
+  SKPD                SKPD[]
+  SPTPD               SPTPD[]
+
+  @@schema("pajak_general")
+}
+
+model PengurusBadan {
+  id               Int          @id @default(autoincrement())
+  badan_id         String
+  orang_pribadi_id String
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime
+  jabatan          String
+  Badan            Badan        @relation(fields: [badan_id], references: [id], onDelete: Cascade)
+  OrangPribadi     OrangPribadi @relation(fields: [orang_pribadi_id], references: [id], onDelete: Cascade)
+
+  @@schema("pajak_general")
+}
+
+model StatusAktif {
+  id             Int        @id @default(autoincrement())
+  wajib_pajak_id Int
+  nonaktif       DateTime
+  aktif_kembali  DateTime?
+  createdAt      DateTime   @default(now())
+  UpdateAt       DateTime
+  alasan         String
+  referensi      String?
+  WajibPajak     WajibPajak @relation(fields: [wajib_pajak_id], references: [id])
+
+  @@schema("pajak_general")
+}
+
+model WajibPajak {
+  id               Int           @id @default(autoincrement())
+  orang_pribadi_id String?
+  badan_id         String?
+  NPWPD            String        @unique
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime
+  ObjekPajak       ObjekPajak[]
+  StatusAktif      StatusAktif[]
+  Badan            Badan?        @relation(fields: [badan_id], references: [id])
+  OrangPribadi     OrangPribadi? @relation(fields: [orang_pribadi_id], references: [id])
+
+  @@schema("pajak_general")
+}
+
+model SKPD {
+  id                    Int        @id @default(autoincrement())
+  nomor_urut            String?
+  nomor_surat           String?
+  kode_bayar_id         String?
+  objek_pajak_id        Int
+  masa_awal             DateTime?
+  masa_akhir            DateTime?
+  dasar_pengenaan_pajak BigInt?
+  pajak_terhutang       BigInt?
+  keterangan            String?
+  createdAt             DateTime   @default(now())
+  updatedAt             DateTime
+  surat_id              Int
+  KodeBayar             KodeBayar? @relation(fields: [kode_bayar_id], references: [id])
+  ObjekPajak            ObjekPajak @relation(fields: [objek_pajak_id], references: [id])
+  Surat                 Surat      @relation(fields: [surat_id], references: [id])
+
+  @@schema("pajak_surat")
+}
+
+model SPTPD {
+  id                Int        @id @default(autoincrement())
+  nomor_urut        String?
+  nomor_surat       String?    @unique
+  objek_pajak_id    Int
+  omzet             BigInt?
+  pajak             BigInt?
+  masa_awal         DateTime?
+  masa_akhir        DateTime?
+  keterangan        String?
+  kode_bayar_id     String?
+  surat_id          Int
+  tanggal_pembuatan DateTime?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime
+  KodeBayar         KodeBayar? @relation(fields: [kode_bayar_id], references: [id])
+  ObjekPajak        ObjekPajak @relation(fields: [objek_pajak_id], references: [id])
+  Surat             Surat      @relation(fields: [surat_id], references: [id])
+
+  @@schema("pajak_surat")
+}
+
+model Surat {
+  id          Int         @id @default(autoincrement())
+  keterangan  String?
+  nomor_surat String?     @unique
+  createAt    DateTime    @default(now())
+  updateAt    DateTime
+  KodeBayar   KodeBayar[]
+  SKPD        SKPD[]
+  SPTPD       SPTPD[]
+
+  @@schema("pajak_surat")
+}
+
+model AnggotaTimPemeriksaan {
+  id             Int            @id @default(autoincrement())
+  pegawai_id     String
+  tim_id         Int
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime
+  Pegawai        Pegawai        @relation(fields: [pegawai_id], references: [id])
+  TimPemeriksaan TimPemeriksaan @relation(fields: [tim_id], references: [id])
+
+  @@schema("pajak_wasrik")
 }
 
 model JenisPemeriksaan {
-  id        Int      @id @default(autoincrement())
-  nama      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  kegiatan_pemeriksaan KegiatanPemeriksaan[]
+  id                  Int                   @id @default(autoincrement())
+  nama                String
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime
+  KegiatanPemeriksaan KegiatanPemeriksaan[]
+
+  @@schema("pajak_wasrik")
 }
 
 model KategoriHasilPemeriksaan {
-  id         Int      @id @default(autoincrement())
-  keterangan String   @db.Text
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  kegiatan_pemeriksaan KegiatanPemeriksaan[]
-}
+  id                  Int                   @id @default(autoincrement())
+  keterangan          String
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime
+  KegiatanPemeriksaan KegiatanPemeriksaan[]
 
-
-
-model KegiatanPemeriksaan {
-  id                            Int      @id @default(autoincrement())
-  tgl_pemeriksaan_mulai         DateTime?
-  tgl_pemeriksaan_selesai       DateTime?
-  NPWPD                         String?
-  nama_wp                       String?
-  masa_pajak_awal               DateTime?
-  masa_pajak_akhir              DateTime?
-  keterangan                    String? @db.Text
-  jumlah_kenaikan               Int?
-  persentase_kenaikan           Float?
-  estimasi_presentasi_kenaikan  Float?
-  jenis_pajak_id                Int?
-  jenis_pemeriksaan_id          Int?
-  hasil_pemeriksaan_id          Int?
-  tim_id                        Int?
-  jenis_pajak                   JenisPajak?               @relation(fields: [jenis_pajak_id], references: [id])
-  jenis_pemeriksaan             JenisPemeriksaan?         @relation(fields: [jenis_pemeriksaan_id], references: [id])
-  hasil_pemeriksaan             KategoriHasilPemeriksaan? @relation(fields: [hasil_pemeriksaan_id], references: [id])
-  tim                           Tim?                      @relation(fields: [tim_id], references: [id])
-  progres_kegiatan             ProgresPemeriksaan[]
-  createdAt                     DateTime @default(now())
-  updatedAt                     DateTime @updatedAt
+  @@schema("pajak_wasrik")
 }
 
 model KategoriProgresPemeriksaan {
-  id         Int      @id @default(autoincrement())
-  nama       String
-  keterangan String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  progres_kegiatan ProgresPemeriksaan[]
+  id                 Int                  @id @default(autoincrement())
+  nama               String
+  keterangan         String?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime
+  ProgresPemeriksaan ProgresPemeriksaan[]
+
+  @@schema("pajak_wasrik")
+}
+
+model KegiatanPemeriksaan {
+  id                           Int                       @id @default(autoincrement())
+  tgl_pemeriksaan_mulai        DateTime?
+  tgl_pemeriksaan_selesai      DateTime?
+  NPWPD                        String?
+  nama_wp                      String?
+  masa_pajak_awal              DateTime?
+  masa_pajak_akhir             DateTime?
+  keterangan                   String?
+  jumlah_kenaikan              Int?
+  persentase_kenaikan          Float?
+  estimasi_presentasi_kenaikan Float?
+  jenis_pajak_id               Int?
+  jenis_pemeriksaan_id         Int?
+  hasil_pemeriksaan_id         Int?
+  tim_id                       Int?
+  createdAt                    DateTime                  @default(now())
+  updatedAt                    DateTime
+  KategoriHasilPemeriksaan     KategoriHasilPemeriksaan? @relation(fields: [hasil_pemeriksaan_id], references: [id])
+  JenisPajak                   JenisPajak?               @relation(fields: [jenis_pajak_id], references: [id])
+  JenisPemeriksaan             JenisPemeriksaan?         @relation(fields: [jenis_pemeriksaan_id], references: [id])
+  TimPemeriksaan               TimPemeriksaan?           @relation(fields: [tim_id], references: [id])
+  ProgresPemeriksaan           ProgresPemeriksaan[]
+
+  @@schema("pajak_wasrik")
 }
 
 model ProgresPemeriksaan {
-  id        Int      @id @default(autoincrement())
-  kegiatan_pemeriksaan_id Int
-  kategori_progres_id Int
-  nomor_surat String?
-  tanggal_surat DateTime?
-  keterangan String? @db.Text
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  kategori_progres KategoriProgresPemeriksaan? @relation(fields: [kategori_progres_id], references: [id])
-  kegiatan_pemeriksaan KegiatanPemeriksaan? @relation(fields: [kegiatan_pemeriksaan_id], references: [id])
+  id                         Int                        @id @default(autoincrement())
+  surat_id                   Int
+  kegiatan_pemeriksaan_id    Int
+  kategori_progres_id        Int
+  nomor_surat                String?
+  tanggal_surat              DateTime?
+  keterangan                 String?
+  createdAt                  DateTime                   @default(now())
+  updatedAt                  DateTime
+  KategoriProgresPemeriksaan KategoriProgresPemeriksaan @relation(fields: [kategori_progres_id], references: [id])
+  KegiatanPemeriksaan        KegiatanPemeriksaan        @relation(fields: [kegiatan_pemeriksaan_id], references: [id])
+
+  @@schema("pajak_wasrik")
+}
+
+model TimPemeriksaan {
+  id                    Int                     @id @default(autoincrement())
+  nama                  String
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime
+  AnggotaTimPemeriksaan AnggotaTimPemeriksaan[]
+  KegiatanPemeriksaan   KegiatanPemeriksaan[]
+
+  @@schema("pajak_wasrik")
+}
+
+model Badan {
+  id                  String            @id
+  NIB                 String            @unique
+  kode_provinsi       String
+  kode_kabupaten      String
+  kode_kecamatan      String
+  kode_desa_kelurahan String
+  RT                  String
+  RW                  String
+  alamat              String
+  createdAt           DateTime          @default(now())
+  nama_badan          String
+  nomor_urut          Int               @default(autoincrement())
+  updatedAt           DateTime
+  InformasiKontak     InformasiKontak[]
+  PengurusBadan       PengurusBadan[]
+  WajibPajak          WajibPajak[]
+  Provinsi            Provinsi          @relation(fields: [kode_provinsi], references: [kode_provinsi])
+  Kabupaten           Kabupaten         @relation(fields: [kode_provinsi, kode_kabupaten], references: [kode_provinsi, kode_kabupaten])
+  Kecamatan           Kecamatan         @relation(fields: [kode_provinsi, kode_kabupaten, kode_kecamatan], references: [kode_provinsi, kode_kabupaten, kode_kecamatan])
+  DesaKelurahan       DesaKelurahan     @relation(fields: [kode_provinsi, kode_kabupaten, kode_kecamatan, kode_desa_kelurahan], references: [kode_provinsi, kode_kabupaten, kode_kecamatan, kode_desa_kelurahan])
+
+  @@schema("public")
+}
+
+model BaganAkun_Akun {
+  uraian_akun               String
+  id                        String                      @id
+  kode_akun                 String
+  BaganAkun_Jenis           BaganAkun_Jenis[]
+  BaganAkun_Kelompok        BaganAkun_Kelompok[]
+  BaganAkun_Objek           BaganAkun_Objek[]
+  BaganAkun_RincianObjek    BaganAkun_RincianObjek[]
+  BaganAkun_SubRincianObjek BaganAkun_SubRincianObjek[]
+
+  @@schema("public")
+}
+
+model BaganAkun_All {
+  id                String  @id
+  akun              String?
+  kelompok          String?
+  objek             String?
+  rincian_objek     String?
+  sub_rincian_objek String?
+  uraian_akun       String
+  jenis             String?
+
+  @@schema("public")
+}
+
+model BaganAkun_Jenis {
+  id                        String                      @id
+  akun_id                   String
+  kelompok_id               String
+  uraian_akun               String
+  kode_akun                 String
+  kode_jenis                String
+  kode_kelompok             String
+  BaganAkun_Akun            BaganAkun_Akun              @relation(fields: [akun_id], references: [id])
+  BaganAkun_Kelompok        BaganAkun_Kelompok          @relation(fields: [kelompok_id], references: [id])
+  BaganAkun_Objek           BaganAkun_Objek[]
+  BaganAkun_RincianObjek    BaganAkun_RincianObjek[]
+  BaganAkun_SubRincianObjek BaganAkun_SubRincianObjek[]
+
+  @@schema("public")
+}
+
+model BaganAkun_Kelompok {
+  uraian_akun               String
+  id                        String                      @id
+  akun_id                   String
+  kode_akun                 String
+  kode_kelompok             String
+  BaganAkun_Jenis           BaganAkun_Jenis[]
+  BaganAkun_Akun            BaganAkun_Akun              @relation(fields: [akun_id], references: [id])
+  BaganAkun_Objek           BaganAkun_Objek[]
+  BaganAkun_RincianObjek    BaganAkun_RincianObjek[]
+  BaganAkun_SubRincianObjek BaganAkun_SubRincianObjek[]
+
+  @@schema("public")
+}
+
+model BaganAkun_Objek {
+  uraian_akun               String
+  id                        String                      @id
+  akun_id                   String
+  kelompok_id               String
+  jenis_id                  String
+  kode_akun                 String
+  kode_jenis                String
+  kode_kelompok             String
+  kode_objek                String
+  JurnalDebit               JurnalDebit[]
+  JurnalKredit              JurnalKredit[]
+  BaganAkun_Akun            BaganAkun_Akun              @relation(fields: [akun_id], references: [id])
+  BaganAkun_Jenis           BaganAkun_Jenis             @relation(fields: [jenis_id], references: [id])
+  BaganAkun_Kelompok        BaganAkun_Kelompok          @relation(fields: [kelompok_id], references: [id])
+  BaganAkun_RincianObjek    BaganAkun_RincianObjek[]
+  BaganAkun_SubRincianObjek BaganAkun_SubRincianObjek[]
+
+  @@schema("public")
+}
+
+model BaganAkun_RincianObjek {
+  uraian_akun               String
+  id                        String                      @id
+  akun_id                   String
+  kelompok_id               String
+  objek_id                  String
+  jenis_id                  String
+  kode_akun                 String
+  kode_jenis                String
+  kode_kelompok             String
+  kode_objek                String
+  kode_rincian_objek        String
+  JurnalDebit               JurnalDebit[]
+  JurnalKredit              JurnalKredit[]
+  BaganAkun_Akun            BaganAkun_Akun              @relation(fields: [akun_id], references: [id])
+  BaganAkun_Jenis           BaganAkun_Jenis             @relation(fields: [jenis_id], references: [id])
+  BaganAkun_Kelompok        BaganAkun_Kelompok          @relation(fields: [kelompok_id], references: [id])
+  BaganAkun_Objek           BaganAkun_Objek             @relation(fields: [objek_id], references: [id])
+  BaganAkun_SubRincianObjek BaganAkun_SubRincianObjek[]
+
+  @@schema("public")
+}
+
+model BaganAkun_SubRincianObjek {
+  uraian_akun            String
+  id                     String                 @id
+  akun_id                String
+  kelompok_id            String
+  objek_id               String
+  rincian_objek_id       String
+  jenis_id               String
+  kode_akun              String
+  kode_jenis             String
+  kode_kelompok          String
+  kode_objek             String
+  kode_rincian_objek     String
+  kode_sub_rincian_objek String
+  JurnalDebit            JurnalDebit[]
+  JurnalKredit           JurnalKredit[]
+  BaganAkun_Akun         BaganAkun_Akun         @relation(fields: [akun_id], references: [id])
+  BaganAkun_Jenis        BaganAkun_Jenis        @relation(fields: [jenis_id], references: [id])
+  BaganAkun_Kelompok     BaganAkun_Kelompok     @relation(fields: [kelompok_id], references: [id])
+  BaganAkun_Objek        BaganAkun_Objek        @relation(fields: [objek_id], references: [id])
+  BaganAkun_RincianObjek BaganAkun_RincianObjek @relation(fields: [rincian_objek_id], references: [id])
+
+  @@schema("public")
+}
+
+model DesaKelurahan {
+  kode_provinsi       String
+  kode_kabupaten      String
+  kode_kecamatan      String
+  kode_desa_kelurahan String
+  nama                String
+  ObjekPajak          ObjekPajak[]
+  Badan               Badan[]
+  Provinsi            Provinsi       @relation(fields: [kode_provinsi], references: [kode_provinsi])
+  Kabupaten           Kabupaten      @relation(fields: [kode_provinsi, kode_kabupaten], references: [kode_provinsi, kode_kabupaten])
+  Kecamatan           Kecamatan      @relation(fields: [kode_provinsi, kode_kabupaten, kode_kecamatan], references: [kode_provinsi, kode_kabupaten, kode_kecamatan])
+  OrangPribadi        OrangPribadi[]
+
+  @@id([kode_provinsi, kode_kabupaten, kode_kecamatan, kode_desa_kelurahan])
+  @@schema("public")
+}
+
+model Kabupaten {
+  kode_provinsi  String
+  kode_kabupaten String
+  nama           String
+  ObjekPajak     ObjekPajak[]
+  Badan          Badan[]
+  DesaKelurahan  DesaKelurahan[]
+  Provinsi       Provinsi        @relation(fields: [kode_provinsi], references: [kode_provinsi])
+  Kecamatan      Kecamatan[]
+  OrangPribadi   OrangPribadi[]
+
+  @@id([kode_provinsi, kode_kabupaten])
+  @@schema("public")
+}
+
+model Kecamatan {
+  kode_provinsi  String
+  kode_kabupaten String
+  kode_kecamatan String
+  nama           String
+  ObjekPajak     ObjekPajak[]
+  Badan          Badan[]
+  DesaKelurahan  DesaKelurahan[]
+  Provinsi       Provinsi        @relation(fields: [kode_provinsi], references: [kode_provinsi])
+  Kabupaten      Kabupaten       @relation(fields: [kode_provinsi, kode_kabupaten], references: [kode_provinsi, kode_kabupaten])
+  OrangPribadi   OrangPribadi[]
+
+  @@id([kode_provinsi, kode_kabupaten, kode_kecamatan])
+  @@schema("public")
+}
+
+model OrangPribadi {
+  id                  String            @id
+  NIK                 String            @unique
+  nama                String
+  kode_provinsi       String
+  kode_kabupaten      String
+  kode_kecamatan      String
+  kode_desa_kelurahan String
+  RT                  String
+  RW                  String
+  alamat              String
+  createdAt           DateTime          @default(now())
+  nomor_urut          Int               @default(autoincrement())
+  updatedAt           DateTime
+  InformasiKontak     InformasiKontak[]
+  PengurusBadan       PengurusBadan[]
+  WajibPajak          WajibPajak[]
+  Provinsi            Provinsi          @relation(fields: [kode_provinsi], references: [kode_provinsi])
+  Kabupaten           Kabupaten         @relation(fields: [kode_provinsi, kode_kabupaten], references: [kode_provinsi, kode_kabupaten])
+  Kecamatan           Kecamatan         @relation(fields: [kode_provinsi, kode_kabupaten, kode_kecamatan], references: [kode_provinsi, kode_kabupaten, kode_kecamatan])
+  DesaKelurahan       DesaKelurahan     @relation(fields: [kode_provinsi, kode_kabupaten, kode_kecamatan, kode_desa_kelurahan], references: [kode_provinsi, kode_kabupaten, kode_kecamatan, kode_desa_kelurahan])
+
+  @@schema("public")
+}
+
+model Pegawai {
+  id                    String                  @id
+  nama_lengkap          String
+  NIK                   String?                 @unique
+  NIP                   String?                 @unique
+  jabatan               String
+  tanggal_masuk_kerja   DateTime
+  tanggal_keluar_kerja  DateTime?
+  alamat                String?
+  nomor_telepon         String?
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime
+  panggilan             String?
+  AnggotaTimPemeriksaan AnggotaTimPemeriksaan[]
+
+  @@schema("public")
+}
+
+model Provinsi {
+  nama          String
+  kode_provinsi String          @id
+  ObjekPajak    ObjekPajak[]
+  Badan         Badan[]
+  DesaKelurahan DesaKelurahan[]
+  Kabupaten     Kabupaten[]
+  Kecamatan     Kecamatan[]
+  OrangPribadi  OrangPribadi[]
+
+  @@schema("public")
 }
