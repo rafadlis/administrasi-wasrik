@@ -30,7 +30,7 @@ export type HasilPemeriksaanType = NonNullable<
 >;
 
 export async function getTim() {
-  const tim = await db.tim.findMany();
+  const tim = await db.timPemeriksaan.findMany();
   return tim;
 }
 
@@ -54,9 +54,9 @@ export type KategoriHasilPemeriksaanType = NonNullable<
   Awaited<ReturnType<typeof getKategoriHasilPemeriksaan>>
 >;
 
-export async function getPetugas() {
-  const petugas = await db.petugas.findMany();
-  return petugas;
+export async function getPegawai() {
+  const pegawai = await db.pegawai.findMany();
+  return pegawai;
 }
 
-export type PetugasType = NonNullable<Awaited<ReturnType<typeof getPetugas>>>;
+export type PegawaiType = NonNullable<Awaited<ReturnType<typeof getPegawai>>>;

@@ -45,22 +45,27 @@ export async function newKegiatan(data: z.infer<typeof newKegiatanSchema>) {
       jenis_pemeriksaan_id,
       hasil_pemeriksaan_id,
       tim_id,
-      progres_kegiatan: {
+      ProgresPemeriksaan: {
         create: [
           {
             kategori_progres_id: 1,
+            surat_id: 1,
           },
           {
             kategori_progres_id: 2,
+            surat_id: 1,
           },
           {
             kategori_progres_id: 3,
+            surat_id: 1,
           },
           {
             kategori_progres_id: 4,
+            surat_id: 1,
           },
           {
             kategori_progres_id: 5,
+            surat_id: 1,
           },
         ],
       },
