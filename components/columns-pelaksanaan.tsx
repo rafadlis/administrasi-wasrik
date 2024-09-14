@@ -85,7 +85,7 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
       header: "Jenis Kegiatan",
       cell: ({ row }) => {
         const data = row.original;
-        return <span>{data.jenis_pemeriksaan?.nama}</span>;
+        return <span>{data.JenisPemeriksaan?.nama}</span>;
       },
     },
     {
@@ -109,11 +109,11 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
         const data = row.original;
         return (
           <div className="flex flex-col">
-            <span>{data.tim?.nama}</span>
+            <span>{data.TimPemeriksaan?.nama}</span>
             <span className="text-sm text-muted-foreground">
-              {data.tim?.anggota_tim
-                ?.map((petugas) => petugas.petugas.panggilan)
-                .join(", ")}
+              {data.TimPemeriksaan?.AnggotaTimPemeriksaan?.map(
+                (petugas) => petugas.Pegawai.panggilan
+              ).join(", ")}
             </span>
           </div>
         );
@@ -127,14 +127,15 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
         return (
           <Badge
             variant={
-              data.progres_kegiatan?.some(
-                (progres) => progres.kategori_progres?.nama === "Selesai"
+              data.ProgresPemeriksaan?.some(
+                (progres) =>
+                  progres.KategoriProgresPemeriksaan?.nama === "Selesai"
               )
                 ? "default"
                 : "outline"
             }
           >
-            {data.hasil_pemeriksaan?.keterangan}
+            {data.KategoriHasilPemeriksaan?.keterangan}
           </Badge>
         );
       },
@@ -165,123 +166,120 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {data.progres_kegiatan
-                      ?.sort((a, b) => {
-                        return (
-                          (a.kategori_progres?.id ?? 0) -
-                          (b.kategori_progres?.id ?? 0)
-                        );
-                      })
-                      .map((progres) => (
-                        <TableRow key={progres.id}>
-                          <TableCell className="text-muted-foreground">
-                            {progres.updatedAt?.toLocaleDateString("id-ID", {
-                              day: "2-digit",
-                              month: "2-digit",
-                              year: "numeric",
-                            })}
-                          </TableCell>
-                          {/* MARK: kategori */}
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <div className="relative">
-                                <div
-                                  className={`w-2 h-2 rounded-full ${
-                                    progres.nomor_surat && progres.tanggal_surat
-                                      ? "bg-green-500"
-                                      : "bg-yellow-500"
-                                  }`}
-                                ></div>
-                                <div
-                                  className={`absolute inset-0 bg-green-500 rounded-full animate-ping opacity-75 ${
-                                    progres.nomor_surat && progres.tanggal_surat
-                                      ? "bg-green-500"
-                                      : "bg-yellow-500"
-                                  }`}
-                                ></div>
-                              </div>
-                              <div>{progres.kategori_progres?.nama}</div>
-                            </div>
-                          </TableCell>
-                          {/* MARK: NS */}
-                          <TableCell>
-                            <Popover>
-                              <PopoverTrigger className="hover:underline underline-offset-4">
-                                {progres.nomor_surat || "kosong"}
-                              </PopoverTrigger>
-                              <PopoverContent>
-                                <form
-                                  className="flex flex-col gap-2"
-                                  action={async (formData) => {
-                                    const nomorSurat =
-                                      formData.get("nomor_surat");
-                                    if (typeof nomorSurat === "string") {
-                                      await updateProgresPemeriksaan(
-                                        progres.id,
-                                        {
-                                          nomor_surat: nomorSurat,
-                                        }
-                                      ).then((res) => {
-                                        if (res.type === "success") {
-                                          toast.success(res.header, {
-                                            description: res.message,
-                                          });
-                                        } else {
-                                          toast.error(res.header, {
-                                            description: res.message,
-                                          });
-                                        }
-                                      });
-                                    }
-                                  }}
-                                >
-                                  <Label>Nomor Surat</Label>
-                                  <Input
-                                    id="nomor_surat"
-                                    name="nomor_surat"
-                                    type="text"
-                                    placeholder="Masukkan Nomor Surat"
-                                  />
-                                  <Button type="submit">Simpan</Button>
-                                </form>
-                              </PopoverContent>
-                            </Popover>
-                          </TableCell>
-                          {/* MARK: TS */}
-                          <TableCell>
-                            <Popover>
-                              <PopoverTrigger
-                                className={`hover:underline underline-offset-4 ${
-                                  progres.tanggal_surat
-                                    ? ""
-                                    : "text-muted-foreground"
+                    {data.ProgresPemeriksaan?.sort((a, b) => {
+                      return (
+                        (a.KategoriProgresPemeriksaan?.id ?? 0) -
+                        (b.KategoriProgresPemeriksaan?.id ?? 0)
+                      );
+                    }).map((progres) => (
+                      <TableRow key={progres.id}>
+                        <TableCell className="text-muted-foreground">
+                          {progres.updatedAt?.toLocaleDateString("id-ID", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                          })}
+                        </TableCell>
+                        {/* MARK: kategori */}
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <div className="relative">
+                              <div
+                                className={`w-2 h-2 rounded-full ${
+                                  progres.nomor_surat && progres.tanggal_surat
+                                    ? "bg-green-500"
+                                    : "bg-yellow-500"
                                 }`}
-                              >
-                                {progres.tanggal_surat?.toLocaleDateString(
-                                  "id-ID",
-                                  {
-                                    day: "2-digit",
-                                    month: "2-digit",
-                                    year: "numeric",
+                              ></div>
+                              <div
+                                className={`absolute inset-0 bg-green-500 rounded-full animate-ping opacity-75 ${
+                                  progres.nomor_surat && progres.tanggal_surat
+                                    ? "bg-green-500"
+                                    : "bg-yellow-500"
+                                }`}
+                              ></div>
+                            </div>
+                            <div>
+                              {progres.KategoriProgresPemeriksaan?.nama}
+                            </div>
+                          </div>
+                        </TableCell>
+                        {/* MARK: NS */}
+                        <TableCell>
+                          <Popover>
+                            <PopoverTrigger className="hover:underline underline-offset-4">
+                              {progres.nomor_surat || "kosong"}
+                            </PopoverTrigger>
+                            <PopoverContent>
+                              <form
+                                className="flex flex-col gap-2"
+                                action={async (formData) => {
+                                  const nomorSurat =
+                                    formData.get("nomor_surat");
+                                  if (typeof nomorSurat === "string") {
+                                    await updateProgresPemeriksaan(progres.id, {
+                                      nomor_surat: nomorSurat,
+                                    }).then((res) => {
+                                      if (res.type === "success") {
+                                        toast.success(res.header, {
+                                          description: res.message,
+                                        });
+                                      } else {
+                                        toast.error(res.header, {
+                                          description: res.message,
+                                        });
+                                      }
+                                    });
                                   }
-                                ) || "kosong"}
-                              </PopoverTrigger>
-                              <PopoverContent>
-                                <Label>Tanggal Surat</Label>
+                                }}
+                              >
+                                <Label>Nomor Surat</Label>
                                 <Input
-                                  id="tanggal_surat"
-                                  name="tanggal_surat"
-                                  type="date"
-                                  placeholder="Masukkan Tanggal Surat"
+                                  id="nomor_surat"
+                                  name="nomor_surat"
+                                  type="text"
+                                  placeholder="Masukkan Nomor Surat"
                                 />
                                 <Button type="submit">Simpan</Button>
-                              </PopoverContent>
-                            </Popover>
-                          </TableCell>
-                          {/* MARK: Dokumen */}
-                          <TableCell>{progres.keterangan}</TableCell>
-                        </TableRow>
-                      ))}
+                              </form>
+                            </PopoverContent>
+                          </Popover>
+                        </TableCell>
+                        {/* MARK: TS */}
+                        <TableCell>
+                          <Popover>
+                            <PopoverTrigger
+                              className={`hover:underline underline-offset-4 ${
+                                progres.tanggal_surat
+                                  ? ""
+                                  : "text-muted-foreground"
+                              }`}
+                            >
+                              {progres.tanggal_surat?.toLocaleDateString(
+                                "id-ID",
+                                {
+                                  day: "2-digit",
+                                  month: "2-digit",
+                                  year: "numeric",
+                                }
+                              ) || "kosong"}
+                            </PopoverTrigger>
+                            <PopoverContent>
+                              <Label>Tanggal Surat</Label>
+                              <Input
+                                id="tanggal_surat"
+                                name="tanggal_surat"
+                                type="date"
+                                placeholder="Masukkan Tanggal Surat"
+                              />
+                              <Button type="submit">Simpan</Button>
+                            </PopoverContent>
+                          </Popover>
+                        </TableCell>
+                        {/* MARK: Dokumen */}
+                        <TableCell>{progres.keterangan}</TableCell>
+                      </TableRow>
+                    ))}
                   </TableBody>
                 </Table>
               </PopoverContent>
@@ -296,8 +294,9 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
               <DropdownMenuContent>
                 <DropdownMenuItem
                   className="cursor-pointer"
-                  disabled={data.progres_kegiatan?.some(
-                    (progres) => progres.kategori_progres?.nama === "Selesai"
+                  disabled={data.ProgresPemeriksaan?.some(
+                    (progres) =>
+                      progres.KategoriProgresPemeriksaan?.nama === "Selesai"
                   )}
                   onClick={async () => {
                     await deleteKegiatan(data.id).then((res) => {

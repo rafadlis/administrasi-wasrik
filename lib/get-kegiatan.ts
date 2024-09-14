@@ -23,10 +23,10 @@ export async function getDaftarKegiatanPemeriksaan() {
       jenis_pemeriksaan_id: true,
       nama_wp: true,
       NPWPD: true,
-      progres_kegiatan: {
+      ProgresPemeriksaan: {
         select: {
           id: true,
-          kategori_progres: {
+          KategoriProgresPemeriksaan: {
             select: {
               id: true,
               nama: true,
@@ -39,25 +39,25 @@ export async function getDaftarKegiatanPemeriksaan() {
           updatedAt: true,
         },
       },
-      hasil_pemeriksaan: {
+      KategoriHasilPemeriksaan: {
         select: {
           id: true,
           keterangan: true,
         },
       },
-      jenis_pemeriksaan: {
+      JenisPemeriksaan: {
         select: {
           id: true,
           nama: true,
         },
       },
-      tim: {
+      TimPemeriksaan: {
         select: {
           id: true,
           nama: true,
-          anggota_tim: {
+          AnggotaTimPemeriksaan: {
             select: {
-              petugas: {
+              Pegawai: {
                 select: {
                   id: true,
                   panggilan: true,
