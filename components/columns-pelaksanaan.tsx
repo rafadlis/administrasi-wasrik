@@ -23,13 +23,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Ellipsis, FolderOpen } from "lucide-react";
+import { Ellipsis, FolderOpen, ScanEye, Upload } from "lucide-react";
 import { deleteKegiatan, undoDeleteKegiatan } from "@/lib/new-kegiatan";
 import { toast } from "sonner";
 import { SheetEditKegiatan } from "./sheet-edit-kegiatan";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { updateProgresPemeriksaan } from "@/lib/update-kegiatan";
+import { uploadDokumen } from "@/lib/new-file";
 
 // TODO: tambah Progress: SP, ST, BA Pertemuan, BAHP, LHP
 // TODO: tambah hasil: skpdkb, Nota Dinas, Bimbingan
@@ -207,8 +208,14 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
                         {/* MARK: NS */}
                         <TableCell>
                           <Popover>
-                            <PopoverTrigger className="hover:underline underline-offset-4">
-                              {progres.nomor_surat || "kosong"}
+                            <PopoverTrigger
+                              className={`hover:underline underline-offset-4 ${
+                                progres.nomor_surat
+                                  ? ""
+                                  : "text-muted-foreground"
+                              }`}
+                            >
+                              {progres.nomor_surat || "Klik untuk edit"}
                             </PopoverTrigger>
                             <PopoverContent>
                               <form
@@ -262,22 +269,91 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
                                   month: "2-digit",
                                   year: "numeric",
                                 }
-                              ) || "kosong"}
+                              ) || "Klik untuk edit"}
                             </PopoverTrigger>
                             <PopoverContent>
-                              <Label>Tanggal Surat</Label>
-                              <Input
-                                id="tanggal_surat"
-                                name="tanggal_surat"
-                                type="date"
-                                placeholder="Masukkan Tanggal Surat"
-                              />
-                              <Button type="submit">Simpan</Button>
+                              <form
+                                className="flex flex-col gap-2"
+                                action={async (formData) => {
+                                  const tanggalSurat =
+                                    formData.get("tanggal_surat");
+                                  if (typeof tanggalSurat === "string") {
+                                    await updateProgresPemeriksaan(progres.id, {
+                                      tanggal_surat: new Date(tanggalSurat),
+                                    }).then((res) => {
+                                      if (res.type === "success") {
+                                        toast.success(res.header, {
+                                          description: res.message,
+                                        });
+                                      } else {
+                                        toast.error(res.header, {
+                                          description: res.message,
+                                        });
+                                      }
+                                    });
+                                  }
+                                }}
+                              >
+                                <Label>Tanggal Surat</Label>
+                                <Input
+                                  id="tanggal_surat"
+                                  name="tanggal_surat"
+                                  type="date"
+                                  placeholder="Masukkan Tanggal Surat"
+                                />
+                                <Button type="submit">Simpan</Button>
+                              </form>
                             </PopoverContent>
                           </Popover>
                         </TableCell>
                         {/* MARK: Dokumen */}
-                        <TableCell>{progres.keterangan}</TableCell>
+                        <TableCell className="flex gap-2">
+                          <Popover>
+                            <PopoverTrigger>
+                              <Button size="icon" variant="secondary">
+                                <Upload className="w-4 h-4" />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent>
+                              <form
+                                className="flex flex-col gap-2"
+                                action={async (formData) => {
+                                  const file = formData.get("file");
+                                  if (file) {
+                                    await uploadDokumen(
+                                      progres.KategoriProgresPemeriksaan?.nama +
+                                        progres.nomor_surat || "",
+                                      file as File
+                                    ).then((res) => {
+                                      if (res.type === "success") {
+                                        toast.success(res.header, {
+                                          description: res.message,
+                                        });
+                                      } else {
+                                        toast.error(res.header, {
+                                          description: res.message,
+                                        });
+                                      }
+                                    });
+                                  }
+                                }}
+                              >
+                                <Label>Dokumen</Label>
+                                <Input
+                                  id="file"
+                                  name="file"
+                                  type="file"
+                                  placeholder="Masukkan Dokumen"
+                                  className="cursor-pointer"
+                                />
+                                <Button type="submit">Simpan</Button>
+                              </form>
+                            </PopoverContent>
+                          </Popover>
+                          <Button size="icon" variant="secondary">
+                            <ScanEye className="w-4 h-4" />
+                          </Button>
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
