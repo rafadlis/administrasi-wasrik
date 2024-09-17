@@ -49,23 +49,18 @@ export async function newKegiatan(data: z.infer<typeof newKegiatanSchema>) {
         create: [
           {
             kategori_progres_id: 1,
-            surat_id: 1,
           },
           {
             kategori_progres_id: 2,
-            surat_id: 1,
           },
           {
             kategori_progres_id: 3,
-            surat_id: 1,
           },
           {
             kategori_progres_id: 4,
-            surat_id: 1,
           },
           {
             kategori_progres_id: 5,
-            surat_id: 1,
           },
         ],
       },

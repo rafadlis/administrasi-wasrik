@@ -370,14 +370,15 @@ model SPTPD {
 }
 
 model Surat {
-  id          Int         @id @default(autoincrement())
-  keterangan  String?
-  nomor_surat String?     @unique
-  createAt    DateTime    @default(now())
-  updateAt    DateTime
-  KodeBayar   KodeBayar[]
-  SKPD        SKPD[]
-  SPTPD       SPTPD[]
+  id                 Int                  @id @default(autoincrement())
+  keterangan         String?
+  nomor_surat        String?              @unique
+  createAt           DateTime             @default(now())
+  updateAt           DateTime
+  KodeBayar          KodeBayar[]
+  SKPD               SKPD[]
+  SPTPD              SPTPD[]
+  ProgresPemeriksaan ProgresPemeriksaan[]
 
   @@schema("pajak_surat")
 }
@@ -454,7 +455,7 @@ model KegiatanPemeriksaan {
 
 model ProgresPemeriksaan {
   id                         Int                        @id @default(autoincrement())
-  surat_id                   Int
+  surat_id                   Int?
   kegiatan_pemeriksaan_id    Int
   kategori_progres_id        Int
   nomor_surat                String?
@@ -464,6 +465,7 @@ model ProgresPemeriksaan {
   updatedAt                  DateTime                   @default(now())
   KategoriProgresPemeriksaan KategoriProgresPemeriksaan @relation(fields: [kategori_progres_id], references: [id])
   KegiatanPemeriksaan        KegiatanPemeriksaan        @relation(fields: [kegiatan_pemeriksaan_id], references: [id])
+  Surat                      Surat?                     @relation(fields: [surat_id], references: [id])
 
   @@schema("pajak_wasrik")
 }
@@ -717,6 +719,7 @@ model Pegawai {
   createdAt             DateTime                @default(now())
   updatedAt             DateTime
   panggilan             String?
+  user_id               String?                 @unique @db.Uuid
   AnggotaTimPemeriksaan AnggotaTimPemeriksaan[]
 
   @@schema("public")
@@ -732,5 +735,13 @@ model Provinsi {
   Kecamatan     Kecamatan[]
   OrangPribadi  OrangPribadi[]
 
+  @@schema("public")
+}
+
+model Wilayah {
+  kode String  @id(map: "wilayah_pkey") @db.VarChar(13)
+  nama String? @db.VarChar(100)
+
+  @@index([nama], map: "wilayah_name_idx")
   @@schema("public")
 }

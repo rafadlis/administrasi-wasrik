@@ -153,8 +153,12 @@ export function SheetEditKegiatan({
                     placeholder={
                       isLoadingJenisPemeriksaan
                         ? "Memuat..."
-                        : data.jenis_pemeriksaan?.nama
-                        ? data.jenis_pemeriksaan?.nama
+                        : dataJenisPemeriksaan.find(
+                            (jenis) => jenis.id === data.jenis_pemeriksaan_id
+                          )?.nama
+                        ? dataJenisPemeriksaan.find(
+                            (jenis) => jenis.id === data.jenis_pemeriksaan_id
+                          )?.nama
                         : "Pilih..."
                     }
                   />
@@ -174,7 +178,7 @@ export function SheetEditKegiatan({
             <fieldset className="flex flex-col gap-2">
               <Label>Tim</Label>
               <Select
-                value={data.tim?.id?.toString() ?? ""}
+                value={data.TimPemeriksaan?.id?.toString() ?? ""}
                 onValueChange={async (value) =>
                   await updateKegiatanPemeriksaan(data.id, {
                     tim_id: parseInt(value),
@@ -196,8 +200,8 @@ export function SheetEditKegiatan({
                     placeholder={
                       isLoadingTim
                         ? "Memuat..."
-                        : data.tim?.nama
-                        ? data.tim?.nama
+                        : data.TimPemeriksaan?.nama
+                        ? data.TimPemeriksaan?.nama
                         : "Pilih..."
                     }
                   />
@@ -219,10 +223,10 @@ export function SheetEditKegiatan({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {data.tim?.anggota_tim.map((anggota) => (
-                    <TableRow key={anggota.petugas.id}>
-                      <TableCell>{anggota.petugas.panggilan}</TableCell>
-                      <TableCell>{anggota.petugas.jabatan}</TableCell>
+                  {data.TimPemeriksaan?.AnggotaTimPemeriksaan.map((anggota) => (
+                    <TableRow key={anggota.Pegawai.id}>
+                      <TableCell>{anggota.Pegawai.panggilan}</TableCell>
+                      <TableCell>{anggota.Pegawai.jabatan}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -236,7 +240,7 @@ export function SheetEditKegiatan({
             <fieldset className="flex flex-col gap-2">
               <Label>Hasil Pemeriksaan</Label>
               <Select
-                value={data.hasil_pemeriksaan?.id?.toString() ?? ""}
+                value={data.KategoriHasilPemeriksaan?.id?.toString() ?? ""}
                 onValueChange={async (value) =>
                   await updateKegiatanPemeriksaan(data.id, {
                     hasil_pemeriksaan_id: parseInt(value),
@@ -258,8 +262,8 @@ export function SheetEditKegiatan({
                     placeholder={
                       isLoadingHasilPemeriksaan
                         ? "Memuat..."
-                        : data.hasil_pemeriksaan?.keterangan
-                        ? data.hasil_pemeriksaan?.keterangan
+                        : data.KategoriHasilPemeriksaan?.keterangan
+                        ? data.KategoriHasilPemeriksaan?.keterangan
                         : "Pilih..."
                     }
                   />
