@@ -1,4 +1,4 @@
-git pull origin main &&
+git pull origin master &&
 npx prisma db pull &&
 npx prisma generate &&
 npm run build &&
