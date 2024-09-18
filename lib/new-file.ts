@@ -1,8 +1,12 @@
 import { createClient } from "./supabase/client";
 
-export async function uploadDokumen(nomor_dok: string, file: File) {
+export async function uploadDokumen(
+  nomor_dok: string,
+  progres_id: number,
+  file: File
+) {
   const supabase = createClient();
-  const { error } = await supabase.storage
+  const { data, error } = await supabase.storage
     .from("Wasrik")
     .upload(`${nomor_dok}-${file.name}`, file);
   if (error) {
@@ -12,9 +16,11 @@ export async function uploadDokumen(nomor_dok: string, file: File) {
       type: "error",
     };
   }
+
   return {
     header: "Berhasil",
     message: "Dokumen berhasil diupload",
     type: "success",
+    data: data,
   };
 }

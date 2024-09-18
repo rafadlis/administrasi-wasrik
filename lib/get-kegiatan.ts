@@ -37,6 +37,7 @@ export async function getDaftarKegiatanPemeriksaan() {
           keterangan: true,
           createdAt: true,
           updatedAt: true,
+          file_url: true,
         },
       },
       KategoriHasilPemeriksaan: {

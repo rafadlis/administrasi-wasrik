@@ -375,6 +375,7 @@ model Surat {
   nomor_surat        String?              @unique
   createAt           DateTime             @default(now())
   updateAt           DateTime
+  file_url           String?
   KodeBayar          KodeBayar[]
   SKPD               SKPD[]
   SPTPD              SPTPD[]
@@ -463,6 +464,7 @@ model ProgresPemeriksaan {
   keterangan                 String?
   createdAt                  DateTime                   @default(now())
   updatedAt                  DateTime                   @default(now())
+  file_url                   String?
   KategoriProgresPemeriksaan KategoriProgresPemeriksaan @relation(fields: [kategori_progres_id], references: [id])
   KegiatanPemeriksaan        KegiatanPemeriksaan        @relation(fields: [kegiatan_pemeriksaan_id], references: [id])
   Surat                      Surat?                     @relation(fields: [surat_id], references: [id])

@@ -320,14 +320,27 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
                                 action={async (formData) => {
                                   const file = formData.get("file");
                                   if (file) {
+                                    const kategoriNama =
+                                      progres.KategoriProgresPemeriksaan
+                                        ?.nama || "";
+                                    const nomorSurat =
+                                      progres.nomor_surat || "";
+                                    const fileName = `${kategoriNama}${nomorSurat}`;
                                     await uploadDokumen(
-                                      progres.KategoriProgresPemeriksaan?.nama +
-                                        progres.nomor_surat || "",
+                                      fileName,
+                                      progres.id,
                                       file as File
-                                    ).then((res) => {
+                                    ).then(async (res) => {
                                       if (res.type === "success") {
-                                        toast.success(res.header, {
-                                          description: res.message,
+                                        await updateProgresPemeriksaan(
+                                          progres.id,
+                                          {
+                                            file_url: res.data?.fullPath,
+                                          }
+                                        ).then((res) => {
+                                          toast.success(res.header, {
+                                            description: res.message,
+                                          });
                                         });
                                       } else {
                                         toast.error(res.header, {
@@ -350,7 +363,11 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
                               </form>
                             </PopoverContent>
                           </Popover>
-                          <Button size="icon" variant="secondary">
+                          <Button
+                            size="icon"
+                            variant="secondary"
+                            disabled={progres.file_url === null}
+                          >
                             <ScanEye className="w-4 h-4" />
                           </Button>
                         </TableCell>
