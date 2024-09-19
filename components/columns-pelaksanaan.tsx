@@ -23,14 +23,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Ellipsis, FolderOpen, ScanEye, Upload } from "lucide-react";
+import { Ellipsis, FolderOpen, ScanEye, Trash, Upload } from "lucide-react";
 import { deleteKegiatan, undoDeleteKegiatan } from "@/lib/new-kegiatan";
 import { toast } from "sonner";
 import { SheetEditKegiatan } from "./sheet-edit-kegiatan";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { updateProgresPemeriksaan } from "@/lib/update-kegiatan";
-import { uploadDokumen } from "@/lib/new-file";
+import { deleteDokumen, uploadDokumen } from "@/lib/file-action";
+import Link from "next/link";
 
 // TODO: tambah Progress: SP, ST, BA Pertemuan, BAHP, LHP
 // TODO: tambah hasil: skpdkb, Nota Dinas, Bimbingan
@@ -187,14 +188,18 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
                             <div className="relative">
                               <div
                                 className={`w-2 h-2 rounded-full ${
-                                  progres.nomor_surat && progres.tanggal_surat
+                                  progres.nomor_surat &&
+                                  progres.tanggal_surat &&
+                                  progres.file_url
                                     ? "bg-green-500"
                                     : "bg-yellow-500"
                                 }`}
                               ></div>
                               <div
                                 className={`absolute inset-0 bg-green-500 rounded-full animate-ping opacity-75 ${
-                                  progres.nomor_surat && progres.tanggal_surat
+                                  progres.nomor_surat &&
+                                  progres.tanggal_surat &&
+                                  progres.file_url
                                     ? "bg-green-500"
                                     : "bg-yellow-500"
                                 }`}
@@ -309,11 +314,13 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
                         {/* MARK: Dokumen */}
                         <TableCell className="flex gap-2">
                           <Popover>
-                            <PopoverTrigger>
-                              <Button size="icon" variant="secondary">
-                                <Upload className="w-4 h-4" />
-                              </Button>
-                            </PopoverTrigger>
+                            {progres.file_url === null && (
+                              <PopoverTrigger>
+                                <Button size="icon" variant="secondary">
+                                  <Upload className="w-4 h-4" />
+                                </Button>
+                              </PopoverTrigger>
+                            )}
                             <PopoverContent>
                               <form
                                 className="flex flex-col gap-2"
@@ -324,8 +331,13 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
                                       progres.KategoriProgresPemeriksaan
                                         ?.nama || "";
                                     const nomorSurat =
-                                      progres.nomor_surat || "";
-                                    const fileName = `${kategoriNama}${nomorSurat}`;
+                                      progres.nomor_surat?.replace(
+                                        /\//g,
+                                        "."
+                                      ) || "";
+                                    const fileName = `${kategoriNama} - ${nomorSurat} - ${
+                                      data.nama_wp
+                                    } - ${data.NPWPD || "no NPWPD"}`;
                                     await uploadDokumen(
                                       fileName,
                                       progres.id,
@@ -363,13 +375,62 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
                               </form>
                             </PopoverContent>
                           </Popover>
-                          <Button
-                            size="icon"
-                            variant="secondary"
-                            disabled={progres.file_url === null}
-                          >
-                            <ScanEye className="w-4 h-4" />
-                          </Button>
+                          {/* MARK: Lihat dok */}
+                          {progres.file_url && (
+                            <Button
+                              size="icon"
+                              variant="secondary"
+                              disabled={progres.file_url === null}
+                              asChild
+                            >
+                              <Link
+                                href={
+                                  progres.file_url
+                                    ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${progres.file_url}`
+                                    : "#"
+                                }
+                                target="_blank"
+                              >
+                                <ScanEye className="w-4 h-4" />
+                              </Link>
+                            </Button>
+                          )}
+                          {/* MARK:Delete Dokumen */}
+                          {progres.file_url && (
+                            <Button
+                              size="icon"
+                              variant="destructive"
+                              disabled={progres.file_url === null}
+                              onClick={async () => {
+                                if (progres.file_url) {
+                                  await deleteDokumen(progres.file_url).then(
+                                    async (res) => {
+                                      if (res.type === "success") {
+                                        await updateProgresPemeriksaan(
+                                          progres.id,
+                                          {
+                                            file_url: null,
+                                          }
+                                        ).then((res) => {
+                                          toast.success(res.header, {
+                                            description:
+                                              res.message +
+                                              "file berhasil dihapus",
+                                          });
+                                        });
+                                      } else {
+                                        toast.error(res.header, {
+                                          description: res.message,
+                                        });
+                                      }
+                                    }
+                                  );
+                                }
+                              }}
+                            >
+                              <Trash className="w-4 h-4" />
+                            </Button>
+                          )}
                         </TableCell>
                       </TableRow>
                     ))}
