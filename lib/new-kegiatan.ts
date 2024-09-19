@@ -58,9 +58,6 @@ export async function newKegiatan(data: z.infer<typeof newKegiatanSchema>) {
           {
             kategori_progres_id: 5,
           },
-          {
-            kategori_progres_id: 6,
-          },
         ],
       },
     },
