@@ -29,7 +29,6 @@ import { Input } from "./ui/input";
 import {
   useHasilPemeriksaan,
   useJenisPajak,
-  useJenisPemeriksaan,
   useTim,
 } from "@/lib/get-other-client";
 import {
@@ -97,11 +96,6 @@ function NewKegiatanForm({ onSuccess }: { onSuccess: () => void }) {
   const { dataJenisPajak, errorJenisPajak, isLoadingJenisPajak } =
     useJenisPajak();
   const {
-    dataJenisPemeriksaan,
-    errorJenisPemeriksaan,
-    isLoadingJenisPemeriksaan,
-  } = useJenisPemeriksaan();
-  const {
     dataHasilPemeriksaan,
     errorHasilPemeriksaan,
     isLoadingHasilPemeriksaan,
@@ -153,7 +147,7 @@ function NewKegiatanForm({ onSuccess }: { onSuccess: () => void }) {
       case 1:
         return ["NPWPD", "nama_wp", "jenis_pajak_id"];
       case 2:
-        return ["jenis_pemeriksaan_id", "hasil_pemeriksaan_id", "tim_id"];
+        return ["hasil_pemeriksaan_id", "tim_id"];
       case 3:
         return ["masa_pajak_awal", "masa_pajak_akhir"];
       case 4:
@@ -315,43 +309,6 @@ function NewKegiatanForm({ onSuccess }: { onSuccess: () => void }) {
 
           {step === 2 && (
             <>
-              <FormField
-                name="jenis_pemeriksaan_id"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Jenis Pemeriksaan</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value?.toString()}
-                      disabled={
-                        isLoadingJenisPemeriksaan || errorJenisPemeriksaan
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue
-                          placeholder={
-                            isLoadingJenisPemeriksaan
-                              ? "Memuat data..."
-                              : "Pilih Jenis Pemeriksaan"
-                          }
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {dataJenisPemeriksaan.map((jenisPemeriksaan) => (
-                          <SelectItem
-                            key={jenisPemeriksaan.id}
-                            value={jenisPemeriksaan.id.toString()}
-                          >
-                            {jenisPemeriksaan.nama}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
               <FormField
                 name="hasil_pemeriksaan_id"
                 control={form.control}

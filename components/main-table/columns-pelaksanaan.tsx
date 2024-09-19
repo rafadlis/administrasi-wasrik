@@ -3,7 +3,7 @@
 import { DaftarKegiatanPemeriksaanType } from "@/lib/get-kegiatan";
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,9 +26,9 @@ import {
 import { Ellipsis, FolderOpen, ScanEye, Trash, Upload } from "lucide-react";
 import { deleteKegiatan, undoDeleteKegiatan } from "@/lib/new-kegiatan";
 import { toast } from "sonner";
-import { SheetEditKegiatan } from "./sheet-edit-kegiatan";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
+import { SheetEditKegiatan } from "../sheet-edit-kegiatan";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
 import { updateProgresPemeriksaan } from "@/lib/update-kegiatan";
 import { deleteDokumen, uploadDokumen } from "@/lib/file-action";
 import Link from "next/link";
@@ -58,14 +58,6 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
     },
 
     {
-      accessorKey: "jenisKegiatan",
-      header: "Jenis Kegiatan",
-      cell: ({ row }) => {
-        const data = row.original;
-        return <span>{data.JenisPemeriksaan?.nama}</span>;
-      },
-    },
-    {
       accessorKey: "wajibPajak",
       header: "Wajib Pajak",
       cell: ({ row }) => {
@@ -73,12 +65,34 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
         return (
           <div className="flex flex-col">
             <span>{data.nama_wp}</span>
-            <span className="text-sm text-muted-foreground">{data.NPWPD}</span>
+            <span className="text-xs text-muted-foreground">{data.NPWPD}</span>
           </div>
         );
       },
     },
-
+    {
+      accessorKey: "objekPajak",
+      header: "Objek Pajak",
+      cell: ({ row }) => {
+        const data = row.original;
+        return (
+          <div className="flex flex-col">
+            {data.JenisPajak?.nama}
+            <span className="text-xs text-muted-foreground">
+              {data.masa_pajak_awal?.toLocaleDateString("id-ID", {
+                month: "2-digit",
+                year: "numeric",
+              })}
+              -
+              {data.masa_pajak_akhir?.toLocaleDateString("id-ID", {
+                month: "2-digit",
+                year: "numeric",
+              })}
+            </span>
+          </div>
+        );
+      },
+    },
     {
       accessorKey: "tim",
       header: "Tim",
@@ -96,6 +110,7 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
         );
       },
     },
+
     {
       accessorKey: "hasilPemeriksaan",
       header: "Hasil Pemeriksaan",
@@ -112,7 +127,7 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
                 : "outline"
             }
           >
-            {data.KategoriHasilPemeriksaan?.keterangan}
+            {data.KategoriHasilPemeriksaan?.keterangan || "Belum ada"}
           </Badge>
         );
       },

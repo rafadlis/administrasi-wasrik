@@ -22,11 +22,7 @@ import { Label } from "@/components/ui/label";
 import { Pencil } from "lucide-react";
 import { DaftarKegiatanPemeriksaanType } from "@/lib/get-kegiatan";
 
-import {
-  useHasilPemeriksaan,
-  useJenisPemeriksaan,
-  useTim,
-} from "@/lib/get-other-client";
+import { useHasilPemeriksaan, useTim } from "@/lib/get-other-client";
 import { updateKegiatanPemeriksaan } from "@/lib/update-kegiatan";
 import { toast } from "sonner";
 import { Separator } from "./ui/separator";
@@ -39,6 +35,8 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
+import { Textarea } from "./ui/textarea";
+import { Input } from "./ui/input";
 
 export function SheetEditKegiatan({
   data,
@@ -46,8 +44,6 @@ export function SheetEditKegiatan({
   data: DaftarKegiatanPemeriksaanType[0];
 }) {
   // MARK: Data
-  const { dataJenisPemeriksaan, isLoadingJenisPemeriksaan } =
-    useJenisPemeriksaan();
   const { dataHasilPemeriksaan, isLoadingHasilPemeriksaan } =
     useHasilPemeriksaan();
   const { dataTim, isLoadingTim } = useTim();
@@ -67,60 +63,135 @@ export function SheetEditKegiatan({
             kegiatan.
           </SheetDescription>
         </SheetHeader>
-        <Tabs className="mt-6" defaultValue="kegiatan">
+        <Tabs className="mt-6" defaultValue="pemeriksaan">
           <TabsList>
-            <TabsTrigger value="kegiatan">Kegiatan</TabsTrigger>
+            <TabsTrigger value="pemeriksaan">Pemeriksaan</TabsTrigger>
             <TabsTrigger value="tim">Tim</TabsTrigger>
             <TabsTrigger value="wp">WP</TabsTrigger>
-            <TabsTrigger value="hasil">Hasil</TabsTrigger>
-            <TabsTrigger value="dokumen">Dok</TabsTrigger>
           </TabsList>
-          {/* MARK: Kegiatan */}
-          <TabsContent value="kegiatan" className="flex flex-col gap-4 mt-6 ">
+          {/* MARK: Pemeriksaan */}
+          <TabsContent
+            value="pemeriksaan"
+            className="flex flex-col gap-6 mt-8 "
+          >
             <fieldset className="flex flex-col gap-2">
-              <Label>Jenis Pemeriksaan</Label>
+              <Label className="text-muted-foreground">Hasil Pemeriksaan</Label>
               <Select
-                value={data.jenis_pemeriksaan_id?.toString() ?? ""}
+                value={data.KategoriHasilPemeriksaan?.id?.toString() ?? ""}
                 onValueChange={async (value) =>
                   await updateKegiatanPemeriksaan(data.id, {
-                    jenis_pemeriksaan_id: parseInt(value),
+                    hasil_pemeriksaan_id: parseInt(value),
                   }).then((res) => {
                     if (res.type === "success") {
-                      toast.success(res.header, {
+                      return toast.success(res.header, {
                         description: res.message,
                       });
                     } else {
-                      toast.error(res.header, {
+                      return toast.error(res.header, {
                         description: res.message,
                       });
                     }
                   })
                 }
               >
-                <SelectTrigger disabled={isLoadingJenisPemeriksaan}>
+                <SelectTrigger disabled={isLoadingHasilPemeriksaan}>
                   <SelectValue
                     placeholder={
-                      isLoadingJenisPemeriksaan
+                      isLoadingHasilPemeriksaan
                         ? "Memuat..."
-                        : dataJenisPemeriksaan.find(
-                            (jenis) => jenis.id === data.jenis_pemeriksaan_id
-                          )?.nama
-                        ? dataJenisPemeriksaan.find(
-                            (jenis) => jenis.id === data.jenis_pemeriksaan_id
-                          )?.nama
+                        : data.KategoriHasilPemeriksaan?.keterangan
+                        ? data.KategoriHasilPemeriksaan?.keterangan
                         : "Pilih..."
                     }
                   />
                 </SelectTrigger>
                 <SelectContent>
-                  {dataJenisPemeriksaan.map((jenis) => (
-                    <SelectItem key={jenis.id} value={jenis.id.toString()}>
-                      {jenis.nama}
+                  {dataHasilPemeriksaan.map((hasil) => (
+                    <SelectItem key={hasil.id} value={hasil.id.toString()}>
+                      {hasil.keterangan}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </fieldset>
+            {/* keterangan */}
+            <form
+              className="flex flex-col gap-6"
+              onSubmit={async (e: React.FormEvent<HTMLFormElement>) => {
+                e.preventDefault();
+                const form = e.currentTarget;
+                await updateKegiatanPemeriksaan(data.id, {
+                  keterangan: (
+                    form.elements.namedItem("keterangan") as HTMLTextAreaElement
+                  ).value,
+                }).then((res) => {
+                  if (res.type === "success") {
+                    return toast.success(res.header, {
+                      description: res.message,
+                    });
+                  } else {
+                    return toast.error(res.header, {
+                      description: res.message,
+                    });
+                  }
+                });
+              }}
+            >
+              <fieldset className="flex flex-col gap-2">
+                <Label className="text-muted-foreground">Keterangan</Label>
+                <Textarea
+                  defaultValue={data.keterangan ?? ""}
+                  name="keterangan"
+                  placeholder={data.keterangan ?? "Masukkan keterangan"}
+                />
+              </fieldset>
+              <fieldset className="flex flex-col gap-2">
+                <Label className="text-muted-foreground">Jumlah Kenaikan</Label>
+                <Input
+                  defaultValue={data.jumlah_kenaikan ?? ""}
+                  name="jumlah_kenaikan"
+                  type="number"
+                  placeholder={
+                    data.jumlah_kenaikan
+                      ? data.jumlah_kenaikan.toString()
+                      : "Rp"
+                  }
+                />
+              </fieldset>
+              <fieldset className="flex flex-col gap-2">
+                <Label className="text-muted-foreground">
+                  Persentase Kenaikan (%)
+                </Label>
+                <Input
+                  defaultValue={data.persentase_kenaikan ?? ""}
+                  name="persentase_kenaikan"
+                  type="number"
+                  placeholder={
+                    data.persentase_kenaikan
+                      ? data.persentase_kenaikan.toString()
+                      : "%"
+                  }
+                />
+              </fieldset>
+              <fieldset className="flex flex-col gap-2">
+                <Label className="text-muted-foreground">
+                  Estimasi Presentasi Kenaikan (%)
+                </Label>
+                <Input
+                  defaultValue={data.estimasi_presentasi_kenaikan ?? ""}
+                  name="estimasi_presentasi_kenaikan"
+                  type="number"
+                  placeholder={
+                    data.estimasi_presentasi_kenaikan
+                      ? data.estimasi_presentasi_kenaikan.toString()
+                      : "%"
+                  }
+                />
+              </fieldset>
+              <Button type="submit" className="ml-auto mt-auto">
+                Simpan
+              </Button>
+            </form>
           </TabsContent>
           {/* MARK: Tim */}
           <TabsContent value="tim" className="flex flex-col gap-4">
@@ -133,11 +204,11 @@ export function SheetEditKegiatan({
                     tim_id: parseInt(value),
                   }).then((res) => {
                     if (res.type === "success") {
-                      toast.success(res.header, {
+                      return toast.success(res.header, {
                         description: res.message,
                       });
                     } else {
-                      toast.error(res.header, {
+                      return toast.error(res.header, {
                         description: res.message,
                       });
                     }
@@ -185,48 +256,10 @@ export function SheetEditKegiatan({
             </fieldset>
           </TabsContent>
           {/* MARK: Hasil */}
-          <TabsContent value="hasil" className="flex flex-col gap-4">
-            <fieldset className="flex flex-col gap-2">
-              <Label>Hasil Pemeriksaan</Label>
-              <Select
-                value={data.KategoriHasilPemeriksaan?.id?.toString() ?? ""}
-                onValueChange={async (value) =>
-                  await updateKegiatanPemeriksaan(data.id, {
-                    hasil_pemeriksaan_id: parseInt(value),
-                  }).then((res) => {
-                    if (res.type === "success") {
-                      toast.success(res.header, {
-                        description: res.message,
-                      });
-                    } else {
-                      toast.error(res.header, {
-                        description: res.message,
-                      });
-                    }
-                  })
-                }
-              >
-                <SelectTrigger disabled={isLoadingHasilPemeriksaan}>
-                  <SelectValue
-                    placeholder={
-                      isLoadingHasilPemeriksaan
-                        ? "Memuat..."
-                        : data.KategoriHasilPemeriksaan?.keterangan
-                        ? data.KategoriHasilPemeriksaan?.keterangan
-                        : "Pilih..."
-                    }
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  {dataHasilPemeriksaan.map((hasil) => (
-                    <SelectItem key={hasil.id} value={hasil.id.toString()}>
-                      {hasil.keterangan}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </fieldset>
-          </TabsContent>
+          <TabsContent
+            value="hasil"
+            className="flex flex-col gap-4"
+          ></TabsContent>
         </Tabs>
       </SheetContent>
     </Sheet>

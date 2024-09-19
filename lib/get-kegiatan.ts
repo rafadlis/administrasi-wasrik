@@ -18,8 +18,19 @@ export async function getDaftarKegiatanPemeriksaan() {
     },
     select: {
       id: true,
-      jenis_pemeriksaan_id: true,
       nama_wp: true,
+      keterangan: true,
+      jumlah_kenaikan: true,
+      persentase_kenaikan: true,
+      estimasi_presentasi_kenaikan: true,
+      JenisPajak: {
+        select: {
+          id: true,
+          nama: true,
+        },
+      },
+      masa_pajak_awal: true,
+      masa_pajak_akhir: true,
       NPWPD: true,
       ProgresPemeriksaan: {
         select: {
@@ -44,12 +55,7 @@ export async function getDaftarKegiatanPemeriksaan() {
           keterangan: true,
         },
       },
-      JenisPemeriksaan: {
-        select: {
-          id: true,
-          nama: true,
-        },
-      },
+
       TimPemeriksaan: {
         select: {
           id: true,

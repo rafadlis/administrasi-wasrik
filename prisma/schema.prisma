@@ -397,21 +397,21 @@ model AnggotaTimPemeriksaan {
 }
 
 model JenisPemeriksaan {
-  id                  Int                   @id @default(autoincrement())
-  nama                String
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime
-  KegiatanPemeriksaan KegiatanPemeriksaan[]
+  id        Int      @id @default(autoincrement())
+  nama      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime
 
   @@schema("pajak_wasrik")
 }
 
 model KategoriHasilPemeriksaan {
-  id                  Int                   @id @default(autoincrement())
-  keterangan          String
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime
-  KegiatanPemeriksaan KegiatanPemeriksaan[]
+  id                                                                                              Int                   @id @default(autoincrement())
+  keterangan                                                                                      String
+  createdAt                                                                                       DateTime              @default(now())
+  updatedAt                                                                                       DateTime
+  KegiatanPemeriksaan                                                                             KegiatanPemeriksaan[]
+  KegiatanPemeriksaan_KegiatanPemeriksaan_kategori_hasil_pemeriksaan_idToKategoriHasilPemeriksaan KegiatanPemeriksaan[] @relation("KegiatanPemeriksaan_kategori_hasil_pemeriksaan_idToKategoriHasilPemeriksaan")
 
   @@schema("pajak_wasrik")
 }
@@ -428,26 +428,26 @@ model KategoriProgresPemeriksaan {
 }
 
 model KegiatanPemeriksaan {
-  id                           Int                       @id @default(autoincrement())
-  NPWPD                        String?
-  nama_wp                      String?
-  masa_pajak_awal              DateTime?
-  masa_pajak_akhir             DateTime?
-  keterangan                   String?
-  jumlah_kenaikan              Int?
-  persentase_kenaikan          Float?
-  estimasi_presentasi_kenaikan Float?
-  jenis_pajak_id               Int?
-  jenis_pemeriksaan_id         Int?
-  hasil_pemeriksaan_id         Int?
-  tim_id                       Int?
-  createdAt                    DateTime                  @default(now())
-  updatedAt                    DateTime                  @default(now())
-  KategoriHasilPemeriksaan     KategoriHasilPemeriksaan? @relation(fields: [hasil_pemeriksaan_id], references: [id])
-  JenisPajak                   JenisPajak?               @relation(fields: [jenis_pajak_id], references: [id])
-  JenisPemeriksaan             JenisPemeriksaan?         @relation(fields: [jenis_pemeriksaan_id], references: [id])
-  TimPemeriksaan               TimPemeriksaan?           @relation(fields: [tim_id], references: [id])
-  ProgresPemeriksaan           ProgresPemeriksaan[]
+  id                                                                                                   Int                       @id @default(autoincrement())
+  NPWPD                                                                                                String?
+  nama_wp                                                                                              String?
+  masa_pajak_awal                                                                                      DateTime?
+  masa_pajak_akhir                                                                                     DateTime?
+  keterangan                                                                                           String?
+  jumlah_kenaikan                                                                                      Int?
+  persentase_kenaikan                                                                                  Float?
+  estimasi_presentasi_kenaikan                                                                         Float?
+  jenis_pajak_id                                                                                       Int?
+  hasil_pemeriksaan_id                                                                                 Int?
+  tim_id                                                                                               Int?
+  createdAt                                                                                            DateTime                  @default(now())
+  updatedAt                                                                                            DateTime                  @default(now())
+  kategori_hasil_pemeriksaan_id                                                                        Int?
+  KategoriHasilPemeriksaan                                                                             KategoriHasilPemeriksaan? @relation(fields: [hasil_pemeriksaan_id], references: [id])
+  JenisPajak                                                                                           JenisPajak?               @relation(fields: [jenis_pajak_id], references: [id])
+  KategoriHasilPemeriksaan_KegiatanPemeriksaan_kategori_hasil_pemeriksaan_idToKategoriHasilPemeriksaan KategoriHasilPemeriksaan? @relation("KegiatanPemeriksaan_kategori_hasil_pemeriksaan_idToKategoriHasilPemeriksaan", fields: [kategori_hasil_pemeriksaan_id], references: [id], onDelete: Restrict)
+  TimPemeriksaan                                                                                       TimPemeriksaan?           @relation(fields: [tim_id], references: [id])
+  ProgresPemeriksaan                                                                                   ProgresPemeriksaan[]
 
   @@schema("pajak_wasrik")
 }

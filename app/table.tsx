@@ -1,5 +1,5 @@
-import { columnsPelaksanaan } from "@/components/columns-pelaksanaan";
-import { DataTable } from "@/components/data-tables";
+import { columnsPelaksanaan } from "@/components/main-table/columns-pelaksanaan";
+import { DataTable } from "@/components/main-table/data-tables";
 import { getDaftarKegiatanPemeriksaan } from "@/lib/get-kegiatan";
 
 export default async function DaftarKegiatanTable() {

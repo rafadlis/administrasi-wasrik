@@ -1,4 +1,4 @@
-import { NewKegiatanDialog } from "@/components/new-kegiatan-form";
+import { NewKegiatanDialog } from "@/components/new-pemeriksaan-form";
 import DaftarKegiatanTable from "./table";
 import { Suspense } from "react";
 import { TableSkeleton } from "@/components/table-skeleton";
