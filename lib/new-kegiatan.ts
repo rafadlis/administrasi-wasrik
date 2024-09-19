@@ -76,17 +76,27 @@ export async function newKegiatan(data: z.infer<typeof newKegiatanSchema>) {
 }
 
 export async function deleteKegiatan(id: number) {
+  // Delete related ProgresPemeriksaan records first
+  const deletedProgres = await db.progresPemeriksaan.deleteMany({
+    where: {
+      kegiatan_pemeriksaan_id: id,
+    },
+  });
+
+  // Then delete the KegiatanPemeriksaan record
   const deletedData = await db.kegiatanPemeriksaan.delete({
     where: {
       id,
     },
   });
+
   revalidatePath("/");
   return {
     header: "Berhasil",
     message: "Kegiatan telah dihapus",
     type: "success",
     deletedData,
+    deletedProgres,
   };
 }
 
@@ -96,8 +106,28 @@ export async function undoDeleteKegiatan(
   await db.kegiatanPemeriksaan.create({
     data: {
       ...data,
+      ProgresPemeriksaan: {
+        create: [
+          {
+            kategori_progres_id: 1,
+          },
+          {
+            kategori_progres_id: 2,
+          },
+          {
+            kategori_progres_id: 3,
+          },
+          {
+            kategori_progres_id: 4,
+          },
+          {
+            kategori_progres_id: 5,
+          },
+        ],
+      },
     },
   });
+
   revalidatePath("/");
   return {
     header: "Berhasil",
