@@ -56,32 +56,7 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
         );
       },
     },
-    {
-      accessorKey: "tanggalKegiatan",
-      header: "Waktu Kegiatan",
-      cell: ({ row }) => {
-        const data = row.original;
-        return (
-          <div className="flex flex-col">
-            <span>
-              {data.tgl_pemeriksaan_mulai?.toLocaleDateString("id-ID", {
-                day: "2-digit",
-                month: "long",
-                year: "numeric",
-              })}
-            </span>
-            <span className="text-sm text-muted-foreground">
-              s.d.{" "}
-              {data.tgl_pemeriksaan_selesai?.toLocaleDateString("id-ID", {
-                day: "2-digit",
-                month: "long",
-                year: "numeric",
-              })}
-            </span>
-          </div>
-        );
-      },
-    },
+
     {
       accessorKey: "jenisKegiatan",
       header: "Jenis Kegiatan",

@@ -12,7 +12,6 @@ import { Button } from "./ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -26,7 +25,6 @@ import { useForm } from "react-hook-form";
 import { useState, useTransition } from "react";
 
 import { CalendarSelect } from "./calendar";
-import { Switch } from "./ui/switch";
 import { Input } from "./ui/input";
 import {
   useHasilPemeriksaan,
@@ -89,13 +87,10 @@ export function NewKegiatanDialog({ className }: { className?: string }) {
 
 function NewKegiatanForm({ onSuccess }: { onSuccess: () => void }) {
   const [step, setStep] = useState(1);
-  const totalSteps = 5;
+  const totalSteps = 4;
   const form = useForm<z.infer<typeof newKegiatanSchema>>({
     resolver: zodResolver(newKegiatanSchema),
     mode: "onChange",
-    defaultValues: {
-      is_selesai: false,
-    },
   });
 
   // fetch data
@@ -156,18 +151,12 @@ function NewKegiatanForm({ onSuccess }: { onSuccess: () => void }) {
   ): (keyof z.infer<typeof newKegiatanSchema>)[] => {
     switch (step) {
       case 1:
-        return [
-          "tgl_pemeriksaan_mulai",
-          "is_selesai",
-          "tgl_pemeriksaan_selesai",
-        ];
-      case 2:
         return ["NPWPD", "nama_wp", "jenis_pajak_id"];
-      case 3:
+      case 2:
         return ["jenis_pemeriksaan_id", "hasil_pemeriksaan_id", "tim_id"];
-      case 4:
+      case 3:
         return ["masa_pajak_awal", "masa_pajak_akhir"];
-      case 5:
+      case 4:
         return [
           "keterangan",
           "jumlah_kenaikan",
@@ -187,70 +176,8 @@ function NewKegiatanForm({ onSuccess }: { onSuccess: () => void }) {
           onSubmit={form.handleSubmit(onSubmit)}
           className="flex flex-col gap-4"
         >
-          {/* MARK: step 1 */}
-          {step === 1 && (
-            <>
-              <FormField
-                name="tgl_pemeriksaan_mulai"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Tanggal Mulai</FormLabel>
-                    <CalendarSelect
-                      field={field}
-                      isFuture={true}
-                      minDate={new Date(1, 1, 2022)}
-                    />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                name="is_selesai"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center gap-3">
-                    <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={(checked) => {
-                          field.onChange(checked);
-                          form.setValue("tgl_pemeriksaan_selesai", undefined);
-                        }}
-                      />
-                    </FormControl>
-                    <div className="flex flex-col ">
-                      <FormLabel>Kegiatan Selesai?</FormLabel>
-                      <FormDescription>
-                        Jika kegiatan selesai, maka tanggal selesai harus diisi
-                      </FormDescription>
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {form.watch("is_selesai") && (
-                <FormField
-                  name="tgl_pemeriksaan_selesai"
-                  control={form.control}
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>Tanggal Selesai</FormLabel>
-                      <CalendarSelect
-                        field={field}
-                        isFuture={false}
-                        minDate={new Date(form.watch("tgl_pemeriksaan_mulai"))}
-                        isDisabled={!form.watch("tgl_pemeriksaan_mulai")}
-                      />
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
-            </>
-          )}
           {/* MARK: step 2 */}
-          {step === 2 && (
+          {step === 1 && (
             <>
               <FormField
                 control={form.control}
@@ -384,9 +311,9 @@ function NewKegiatanForm({ onSuccess }: { onSuccess: () => void }) {
             </>
           )}
 
-          {/* MARK: step 3 */}
+          {/* MARK: step 2 */}
 
-          {step === 3 && (
+          {step === 2 && (
             <>
               <FormField
                 name="jenis_pemeriksaan_id"
@@ -495,9 +422,9 @@ function NewKegiatanForm({ onSuccess }: { onSuccess: () => void }) {
             </>
           )}
 
-          {/* MARK: step 4 */}
+          {/* MARK: step 3 */}
 
-          {step === 4 && (
+          {step === 3 && (
             <>
               <FormField
                 name="masa_pajak_awal"
@@ -533,9 +460,9 @@ function NewKegiatanForm({ onSuccess }: { onSuccess: () => void }) {
             </>
           )}
 
-          {/* MARK: step 5 */}
+          {/* MARK: step 4 */}
 
-          {step === 5 && (
+          {step === 4 && (
             <>
               <FormField
                 name="keterangan"

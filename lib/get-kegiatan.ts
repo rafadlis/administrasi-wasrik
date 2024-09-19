@@ -18,8 +18,6 @@ export async function getDaftarKegiatanPemeriksaan() {
     },
     select: {
       id: true,
-      tgl_pemeriksaan_mulai: true,
-      tgl_pemeriksaan_selesai: true,
       jenis_pemeriksaan_id: true,
       nama_wp: true,
       NPWPD: true,

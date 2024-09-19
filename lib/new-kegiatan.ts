@@ -16,8 +16,6 @@ export async function newKegiatan(data: z.infer<typeof newKegiatanSchema>) {
     };
   }
   const {
-    tgl_pemeriksaan_mulai,
-    tgl_pemeriksaan_selesai,
     NPWPD,
     nama_wp,
     masa_pajak_awal,
@@ -32,8 +30,6 @@ export async function newKegiatan(data: z.infer<typeof newKegiatanSchema>) {
   } = validatedFields.data;
   await db.kegiatanPemeriksaan.create({
     data: {
-      tgl_pemeriksaan_mulai,
-      tgl_pemeriksaan_selesai,
       NPWPD,
       nama_wp,
       masa_pajak_awal,
@@ -61,6 +57,9 @@ export async function newKegiatan(data: z.infer<typeof newKegiatanSchema>) {
           },
           {
             kategori_progres_id: 5,
+          },
+          {
+            kategori_progres_id: 6,
           },
         ],
       },

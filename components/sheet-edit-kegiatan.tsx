@@ -39,7 +39,6 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
-import { Input } from "./ui/input";
 
 export function SheetEditKegiatan({
   data,
@@ -78,56 +77,6 @@ export function SheetEditKegiatan({
           </TabsList>
           {/* MARK: Kegiatan */}
           <TabsContent value="kegiatan" className="flex flex-col gap-4 mt-6 ">
-            <fieldset className="flex flex-col gap-2">
-              <Label>Tanggal Awal</Label>
-              <Input
-                type="date"
-                value={
-                  data.tgl_pemeriksaan_mulai
-                    ? data.tgl_pemeriksaan_mulai.toISOString().split("T")[0]
-                    : ""
-                }
-                onChange={async (e) =>
-                  await updateKegiatanPemeriksaan(data.id, {
-                    tgl_pemeriksaan_mulai: new Date(e.target.value),
-                  }).then((res) => {
-                    if (res.type === "success") {
-                      toast.success(res.header, {
-                        description: res.message,
-                      });
-                    } else {
-                      toast.error(res.header, {
-                        description: res.message,
-                      });
-                    }
-                  })
-                }
-              />
-              <Label>Tanggal Akhir</Label>
-              <Input
-                type="date"
-                value={
-                  data.tgl_pemeriksaan_selesai
-                    ? data.tgl_pemeriksaan_selesai.toISOString().split("T")[0]
-                    : ""
-                }
-                onChange={async (e) =>
-                  await updateKegiatanPemeriksaan(data.id, {
-                    tgl_pemeriksaan_selesai: new Date(e.target.value),
-                  }).then((res) => {
-                    if (res.type === "success") {
-                      toast.success(res.header, {
-                        description: res.message,
-                      });
-                    } else {
-                      toast.error(res.header, {
-                        description: res.message,
-                      });
-                    }
-                  })
-                }
-              />
-            </fieldset>
             <fieldset className="flex flex-col gap-2">
               <Label>Jenis Pemeriksaan</Label>
               <Select

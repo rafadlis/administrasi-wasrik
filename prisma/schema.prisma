@@ -429,8 +429,6 @@ model KategoriProgresPemeriksaan {
 
 model KegiatanPemeriksaan {
   id                           Int                       @id @default(autoincrement())
-  tgl_pemeriksaan_mulai        DateTime?
-  tgl_pemeriksaan_selesai      DateTime?
   NPWPD                        String?
   nama_wp                      String?
   masa_pajak_awal              DateTime?
