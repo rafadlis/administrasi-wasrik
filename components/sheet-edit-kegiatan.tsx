@@ -254,7 +254,7 @@ export function SheetEditKegiatan({
                 </TableBody>
                 <TableCaption>Anggota Tim</TableCaption>
               </Table>
-              <NewTimDialog className="mt-4 ml-auto" kegiatanId={data.id} />
+              <NewTimDialog className="mt-4 ml-auto" />
             </fieldset>
           </TabsContent>
           {/* MARK: Hasil */}
