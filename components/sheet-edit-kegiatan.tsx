@@ -38,6 +38,8 @@ import {
 import { Textarea } from "./ui/textarea";
 import { Input } from "./ui/input";
 
+import { NewTimDialog } from "./new-tim-dialog";
+
 export function SheetEditKegiatan({
   data,
 }: {
@@ -252,7 +254,7 @@ export function SheetEditKegiatan({
                 </TableBody>
                 <TableCaption>Anggota Tim</TableCaption>
               </Table>
-              <Button className="mt-3 ml-auto">+ Tim Baru</Button>
+              <NewTimDialog className="mt-4 ml-auto" kegiatanId={data.id} />
             </fieldset>
           </TabsContent>
           {/* MARK: Hasil */}
