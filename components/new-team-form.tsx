@@ -20,6 +20,7 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { createTim } from "@/lib/new-other";
 import { toast } from "sonner";
+import { UserMinus } from "lucide-react";
 
 export function NewTeamForm() {
   const { dataPegawai, isLoadingPegawai } = usePegawai();
@@ -61,65 +62,85 @@ export function NewTeamForm() {
           <Input name="nama" type="text" placeholder="Nama Tim" required />
         </fieldset>
 
-        {selectedPegawai.map((pegawai, index) => (
-          <fieldset key={index} className="flex flex-col gap-2">
-            <Label htmlFor={`anggota${index}`}>Anggota {index + 1}</Label>
-            <Input
-              name={`anggota${index}`}
-              type="number"
-              value={pegawai.id || ""}
-              className="hidden"
-            />
-            <Popover>
-              <PopoverTrigger asChild>
+        <fieldset className="flex flex-col gap-2">
+          <div className="flex gap-2 items-center">
+            <Label>Anggota</Label>
+            {selectedPegawai.length < 8 && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleAddMember}
+              >
+                + Tambah Anggota
+              </Button>
+            )}
+          </div>
+
+          {selectedPegawai.map((pegawai, index) => (
+            <div key={index}>
+              <Input
+                name={`anggota${index}`}
+                type="number"
+                value={pegawai.id || ""}
+                className="hidden"
+              />
+              <div className="flex gap-2">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      role="combobox"
+                      className={`${
+                        !pegawai.id ? "text-muted-foreground" : ""
+                      } flex-1`}
+                      disabled={isLoadingPegawai}
+                    >
+                      {pegawai.nama_lengkap ||
+                        (isLoadingPegawai
+                          ? "Memuat..."
+                          : `pilih anggota ke-${index + 1}`)}
+                      <CaretSortIcon className="ml-auto h-4 w-4" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="p-0">
+                    <Command>
+                      <CommandInput placeholder="Cari Pegawai..." />
+                      <CommandList>
+                        <CommandEmpty>
+                          Tidak ada pegawai yang ditemukan
+                        </CommandEmpty>
+                        <CommandGroup>
+                          {dataPegawai.map((p) => (
+                            <CommandItem
+                              key={p.id}
+                              onSelect={() => {
+                                const newSelectedPegawai = [...selectedPegawai];
+                                newSelectedPegawai[index] = p;
+                                setSelectedPegawai(newSelectedPegawai);
+                              }}
+                            >
+                              {p.nama_lengkap}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
                 <Button
                   type="button"
-                  variant="outline"
-                  role="combobox"
-                  className={!pegawai.id ? "text-muted-foreground" : ""}
-                  disabled={isLoadingPegawai}
+                  variant="destructive"
+                  size="icon"
+                  onClick={() => handleRemoveMember(index)}
                 >
-                  {pegawai.nama_lengkap ||
-                    (isLoadingPegawai ? "Memuat..." : "Pilih Pegawai")}
-                  <CaretSortIcon className="ml-auto h-4 w-4" />
+                  <UserMinus className="w-4 h-4" />
                 </Button>
-              </PopoverTrigger>
-              <PopoverContent className="p-0">
-                <Command>
-                  <CommandInput placeholder="Cari Pegawai..." />
-                  <CommandList>
-                    <CommandEmpty>
-                      Tidak ada pegawai yang ditemukan
-                    </CommandEmpty>
-                    <CommandGroup>
-                      {dataPegawai.map((p) => (
-                        <CommandItem
-                          key={p.id}
-                          onSelect={() => {
-                            const newSelectedPegawai = [...selectedPegawai];
-                            newSelectedPegawai[index] = p;
-                            setSelectedPegawai(newSelectedPegawai);
-                          }}
-                        >
-                          {p.nama_lengkap}
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
-            <Button type="button" onClick={() => handleRemoveMember(index)}>
-              Hapus Anggota
-            </Button>
-          </fieldset>
-        ))}
-
-        {selectedPegawai.length < 8 && (
-          <Button type="button" onClick={handleAddMember}>
-            Tambah Anggota
-          </Button>
-        )}
+              </div>
+            </div>
+          ))}
+        </fieldset>
 
         <Button type="submit" className="ml-auto">
           Buat Tim
