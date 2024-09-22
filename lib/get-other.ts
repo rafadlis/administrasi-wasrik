@@ -60,3 +60,12 @@ export async function getPegawai() {
 }
 
 export type PegawaiType = NonNullable<Awaited<ReturnType<typeof getPegawai>>>;
+
+export async function getJurnalPemeriksaan() {
+  const jurnalPemeriksaan = await db.jurnalPemeriksaan.findMany();
+  return jurnalPemeriksaan;
+}
+
+export type JurnalPemeriksaanType = NonNullable<
+  Awaited<ReturnType<typeof getJurnalPemeriksaan>>
+>;

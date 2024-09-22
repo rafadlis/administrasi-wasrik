@@ -2,6 +2,7 @@
 
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { JurnalPemeriksaanType } from "./get-other";
 
 export async function createTim(data: { nama: string; anggota: string[] }) {
   try {
@@ -35,14 +36,48 @@ export async function createTim(data: { nama: string; anggota: string[] }) {
   };
 }
 
+export async function createJurnalPemeriksaan(
+  kegiatan_pemeriksaan_id: number,
+  tanggal: string,
+  nama: string,
+  lokasi: string,
+  keterangan: string
+) {
+  try {
+    await db.jurnalPemeriksaan.create({
+      data: {
+        tanggal: new Date(tanggal),
+        nama: nama,
+        lokasi: lokasi,
+        keterangan: keterangan,
+        kegiatan_pemeriksaan_id: kegiatan_pemeriksaan_id,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    return {
+      header: "Gagal Menambahkan Jurnal",
+      message: "Coba lagi atau hubungi admin",
+      type: "error",
+    };
+  }
+
+  revalidatePath("/");
+  return {
+    header: "Berhasil Menambahkan Jurnal",
+    message: "Silahkan cek di halaman jurnal",
+    type: "success",
+  };
+}
+
 export async function updateJurnalPemeriksaan(
   id: number | bigint,
-  keterangan: string
+  data: Partial<JurnalPemeriksaanType[0]>
 ) {
   try {
     await db.jurnalPemeriksaan.update({
       where: { id: id },
-      data: { keterangan: keterangan },
+      data: { ...data },
     });
   } catch (error) {
     console.log(error);
