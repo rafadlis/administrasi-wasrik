@@ -37,7 +37,7 @@ export async function newKegiatan(data: z.infer<typeof newKegiatanSchema>) {
       jumlah_kenaikan,
       persentase_kenaikan,
       jenis_pajak_id,
-      hasil_pemeriksaan_id,
+      kategori_hasil_pemeriksaan_id: hasil_pemeriksaan_id,
       tim_id,
       ProgresPemeriksaan: {
         create: [

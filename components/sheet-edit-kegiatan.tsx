@@ -82,7 +82,7 @@ export function SheetEditKegiatan({
                 value={data.KategoriHasilPemeriksaan?.id?.toString() ?? ""}
                 onValueChange={async (value) =>
                   await updateKegiatanPemeriksaan(data.id, {
-                    hasil_pemeriksaan_id: parseInt(value),
+                    kategori_hasil_pemeriksaan_id: parseInt(value),
                   }).then((res) => {
                     if (res.type === "success") {
                       return toast.success(res.header, {
