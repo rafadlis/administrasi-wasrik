@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logout } from "@/lib/logout";
+import { NewTimDialog } from "@/components/new-tim-dialog";
 // import ProgressValueCard from "@/components/progress-value-card";
 // import { BarChartMultipleCard } from "@/components/bar-chart-multiple";
 // import { BarChartMultiple } from "@/components/bar-chart-multiple";
@@ -29,7 +30,10 @@ export default async function Home() {
         </div>
       </section>
       <section className="flex flex-col gap-3">
-        <NewKegiatanDialog className="self-start ml-auto" />
+        <div className="flex flex-row justify-end gap-3">
+          <NewTimDialog buttonVariant="outline" />
+          <NewKegiatanDialog />
+        </div>
         <Suspense fallback={<TableSkeleton row={10} column={8} />}>
           <DaftarKegiatanTable />
         </Suspense>

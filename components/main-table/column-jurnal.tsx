@@ -260,7 +260,11 @@ export function KolomJurnal({
                         <PencilLine className="w-4 h-4" />
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-full max-w-prose">
+                    <PopoverContent
+                      className="w-full max-w-prose"
+                      align="end"
+                      side="bottom"
+                    >
                       <form
                         className="flex flex-col gap-2"
                         action={async (formData) => {

@@ -8,11 +8,19 @@ import {
 import { Button } from "./ui/button";
 import { NewTeamForm } from "./new-team-form";
 
-export function NewTimDialog({ className }: { className: string }) {
+export function NewTimDialog({
+  className,
+  buttonVariant,
+}: {
+  className?: string;
+  buttonVariant?: "default" | "outline";
+}) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className={className}>+ Tambah Tim</Button>
+        <Button className={className} variant={buttonVariant}>
+          + Tambah Tim
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
