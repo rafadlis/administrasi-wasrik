@@ -6,7 +6,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  schemas  = ["pajak_admin", "pajak_general", "pajak_surat", "pajak_wasrik", "public"]
+  schemas  = ["pajak_admin", "pajak_general", "pajak_surat", "pajak_wasrik", "public", "storage"]
 }
 
 model DataReklame {
@@ -369,6 +369,7 @@ model SPTPD {
   @@schema("pajak_surat")
 }
 
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model Surat {
   id                 Int                  @id @default(autoincrement())
   keterangan         String?
@@ -396,6 +397,19 @@ model AnggotaTimPemeriksaan {
   @@schema("pajak_wasrik")
 }
 
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model DokumentasiPemeriksaan {
+  id                BigInt             @id @default(autoincrement())
+  created_at        DateTime           @default(now()) @db.Timestamptz(6)
+  object_id         String?            @db.Uuid
+  jurnal_id         BigInt?
+  keterangan        String?
+  JurnalPemeriksaan JurnalPemeriksaan? @relation(fields: [jurnal_id], references: [id], onDelete: Cascade)
+  objects           objects?           @relation(fields: [object_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@schema("pajak_wasrik")
+}
+
 model JenisPemeriksaan {
   id        Int      @id @default(autoincrement())
   nama      String
@@ -405,13 +419,27 @@ model JenisPemeriksaan {
   @@schema("pajak_wasrik")
 }
 
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model JurnalPemeriksaan {
+  id                      BigInt                   @id @default(autoincrement())
+  created_at              DateTime                 @default(now()) @db.Timestamptz(6)
+  tanggal                 DateTime                 @db.Timestamptz(6)
+  lokasi                  String
+  nama                    String
+  keterangan              String
+  kegiatan_pemeriksaan_id Int
+  DokumentasiPemeriksaan  DokumentasiPemeriksaan[]
+  KegiatanPemeriksaan     KegiatanPemeriksaan      @relation(fields: [kegiatan_pemeriksaan_id], references: [id], onDelete: Cascade)
+
+  @@schema("pajak_wasrik")
+}
+
 model KategoriHasilPemeriksaan {
-  id                                                                                              Int                   @id @default(autoincrement())
-  keterangan                                                                                      String
-  createdAt                                                                                       DateTime              @default(now())
-  updatedAt                                                                                       DateTime
-  KegiatanPemeriksaan                                                                             KegiatanPemeriksaan[]
-  KegiatanPemeriksaan_KegiatanPemeriksaan_kategori_hasil_pemeriksaan_idToKategoriHasilPemeriksaan KegiatanPemeriksaan[] @relation("KegiatanPemeriksaan_kategori_hasil_pemeriksaan_idToKategoriHasilPemeriksaan")
+  id                  Int                   @id @default(autoincrement())
+  keterangan          String
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime
+  KegiatanPemeriksaan KegiatanPemeriksaan[]
 
   @@schema("pajak_wasrik")
 }
@@ -428,30 +456,30 @@ model KategoriProgresPemeriksaan {
 }
 
 model KegiatanPemeriksaan {
-  id                                                                                                   Int                       @id @default(autoincrement())
-  NPWPD                                                                                                String?
-  nama_wp                                                                                              String?
-  masa_pajak_awal                                                                                      DateTime?
-  masa_pajak_akhir                                                                                     DateTime?
-  keterangan                                                                                           String?
-  jumlah_kenaikan                                                                                      Int?
-  persentase_kenaikan                                                                                  Float?
-  estimasi_presentasi_kenaikan                                                                         Float?
-  jenis_pajak_id                                                                                       Int?
-  hasil_pemeriksaan_id                                                                                 Int?
-  tim_id                                                                                               Int?
-  createdAt                                                                                            DateTime                  @default(now())
-  updatedAt                                                                                            DateTime                  @default(now())
-  kategori_hasil_pemeriksaan_id                                                                        Int?
-  KategoriHasilPemeriksaan                                                                             KategoriHasilPemeriksaan? @relation(fields: [hasil_pemeriksaan_id], references: [id])
-  JenisPajak                                                                                           JenisPajak?               @relation(fields: [jenis_pajak_id], references: [id])
-  KategoriHasilPemeriksaan_KegiatanPemeriksaan_kategori_hasil_pemeriksaan_idToKategoriHasilPemeriksaan KategoriHasilPemeriksaan? @relation("KegiatanPemeriksaan_kategori_hasil_pemeriksaan_idToKategoriHasilPemeriksaan", fields: [kategori_hasil_pemeriksaan_id], references: [id], onDelete: Restrict)
-  TimPemeriksaan                                                                                       TimPemeriksaan?           @relation(fields: [tim_id], references: [id])
-  ProgresPemeriksaan                                                                                   ProgresPemeriksaan[]
+  id                            Int                       @id @default(autoincrement())
+  NPWPD                         String?
+  nama_wp                       String?
+  masa_pajak_awal               DateTime?
+  masa_pajak_akhir              DateTime?
+  keterangan                    String?
+  jumlah_kenaikan               Int?
+  persentase_kenaikan           Float?
+  estimasi_presentasi_kenaikan  Float?
+  jenis_pajak_id                Int?
+  tim_id                        Int?
+  createdAt                     DateTime                  @default(now())
+  updatedAt                     DateTime                  @default(now())
+  kategori_hasil_pemeriksaan_id Int?
+  JurnalPemeriksaan             JurnalPemeriksaan[]
+  JenisPajak                    JenisPajak?               @relation(fields: [jenis_pajak_id], references: [id])
+  KategoriHasilPemeriksaan      KategoriHasilPemeriksaan? @relation(fields: [kategori_hasil_pemeriksaan_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  TimPemeriksaan                TimPemeriksaan?           @relation(fields: [tim_id], references: [id])
+  ProgresPemeriksaan            ProgresPemeriksaan[]
 
   @@schema("pajak_wasrik")
 }
 
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model ProgresPemeriksaan {
   id                         Int                        @id @default(autoincrement())
   surat_id                   Int?
@@ -681,6 +709,7 @@ model Kecamatan {
   @@schema("public")
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model OrangPribadi {
   id                  String            @id
   NIK                 String            @unique
@@ -706,6 +735,7 @@ model OrangPribadi {
   @@schema("public")
 }
 
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model Pegawai {
   id                    String                  @id
   nama_lengkap          String
@@ -717,9 +747,11 @@ model Pegawai {
   alamat                String?
   nomor_telepon         String?
   createdAt             DateTime                @default(now())
-  updatedAt             DateTime
+  updatedAt             DateTime                @default(now())
   panggilan             String?
   user_id               String?                 @unique @db.Uuid
+  golongan              String?
+  bidang                bidang_bapenda?
   AnggotaTimPemeriksaan AnggotaTimPemeriksaan[]
 
   @@schema("public")
@@ -743,5 +775,107 @@ model Wilayah {
   nama String? @db.VarChar(100)
 
   @@index([nama], map: "wilayah_name_idx")
+  @@schema("public")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model buckets {
+  id                         String                       @id
+  name                       String                       @unique(map: "bname")
+  owner                      String?                      @db.Uuid
+  created_at                 DateTime?                    @default(now()) @db.Timestamptz(6)
+  updated_at                 DateTime?                    @default(now()) @db.Timestamptz(6)
+  public                     Boolean?                     @default(false)
+  avif_autodetection         Boolean?                     @default(false)
+  file_size_limit            BigInt?
+  allowed_mime_types         String[]
+  owner_id                   String?
+  objects                    objects[]
+  s3_multipart_uploads       s3_multipart_uploads[]
+  s3_multipart_uploads_parts s3_multipart_uploads_parts[]
+
+  @@schema("storage")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model migrations {
+  id          Int       @id
+  name        String    @unique @db.VarChar(100)
+  hash        String    @db.VarChar(40)
+  executed_at DateTime? @default(now()) @db.Timestamp(6)
+
+  @@schema("storage")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model objects {
+  id                     String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  bucket_id              String?
+  name                   String?
+  owner                  String?                  @db.Uuid
+  created_at             DateTime?                @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime?                @default(now()) @db.Timestamptz(6)
+  last_accessed_at       DateTime?                @default(now()) @db.Timestamptz(6)
+  metadata               Json?
+  path_tokens            String[]                 @default(dbgenerated("string_to_array(name, '/'::text)"))
+  version                String?
+  owner_id               String?
+  user_metadata          Json?
+  DokumentasiPemeriksaan DokumentasiPemeriksaan[]
+  buckets                buckets?                 @relation(fields: [bucket_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "objects_bucketId_fkey")
+
+  @@unique([bucket_id, name], map: "bucketid_objname")
+  @@index([bucket_id, name], map: "idx_objects_bucket_id_name")
+  @@index([name], map: "name_prefix_search")
+  @@schema("storage")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model s3_multipart_uploads {
+  id                         String                       @id
+  in_progress_size           BigInt                       @default(0)
+  upload_signature           String
+  bucket_id                  String
+  key                        String
+  version                    String
+  owner_id                   String?
+  created_at                 DateTime                     @default(now()) @db.Timestamptz(6)
+  user_metadata              Json?
+  buckets                    buckets                      @relation(fields: [bucket_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  s3_multipart_uploads_parts s3_multipart_uploads_parts[]
+
+  @@index([bucket_id, key, created_at], map: "idx_multipart_uploads_list")
+  @@schema("storage")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model s3_multipart_uploads_parts {
+  id                   String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  upload_id            String
+  size                 BigInt               @default(0)
+  part_number          Int
+  bucket_id            String
+  key                  String
+  etag                 String
+  owner_id             String?
+  version              String
+  created_at           DateTime             @default(now()) @db.Timestamptz(6)
+  buckets              buckets              @relation(fields: [bucket_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  s3_multipart_uploads s3_multipart_uploads @relation(fields: [upload_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("storage")
+}
+
+/// This enum is commented in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+enum bidang_bapenda {
+  sekretariat
+  pimpinan
+  penagihan
+  pendataan
+  wasrik
+  ti
+
   @@schema("public")
 }

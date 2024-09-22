@@ -32,6 +32,21 @@ export async function getDaftarKegiatanPemeriksaan() {
       masa_pajak_awal: true,
       masa_pajak_akhir: true,
       NPWPD: true,
+      JurnalPemeriksaan: {
+        select: {
+          id: true,
+          nama: true,
+          tanggal: true,
+          lokasi: true,
+          keterangan: true,
+        },
+      },
+      KategoriHasilPemeriksaan: {
+        select: {
+          id: true,
+          keterangan: true,
+        },
+      },
       ProgresPemeriksaan: {
         select: {
           id: true,
@@ -41,18 +56,13 @@ export async function getDaftarKegiatanPemeriksaan() {
               nama: true,
             },
           },
+
           tanggal_surat: true,
           nomor_surat: true,
           keterangan: true,
           createdAt: true,
           updatedAt: true,
           file_url: true,
-        },
-      },
-      KategoriHasilPemeriksaan: {
-        select: {
-          id: true,
-          keterangan: true,
         },
       },
 

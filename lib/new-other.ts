@@ -34,3 +34,29 @@ export async function createTim(data: { nama: string; anggota: string[] }) {
     type: "success",
   };
 }
+
+export async function updateJurnalPemeriksaan(
+  id: number | bigint,
+  keterangan: string
+) {
+  try {
+    await db.jurnalPemeriksaan.update({
+      where: { id: id },
+      data: { keterangan: keterangan },
+    });
+  } catch (error) {
+    console.log(error);
+    return {
+      header: "Gagal Mengubah Jurnal",
+      message: "Coba lagi atau hubungi admin",
+      type: "error",
+    };
+  }
+
+  revalidatePath("/");
+  return {
+    header: "Berhasil Mengubah Jurnal",
+    message: "Silahkan cek di halaman jurnal",
+    type: "success",
+  };
+}
