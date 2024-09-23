@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { db } from "./db";
 
 export async function getDaftarKegiatanNoRelation() {
@@ -39,6 +40,12 @@ export async function getDaftarKegiatanPemeriksaan() {
           tanggal: true,
           lokasi: true,
           keterangan: true,
+          DokumentasiPemeriksaan: {
+            select: {
+              id: true,
+              file_url: true,
+            },
+          },
         },
       },
       KategoriHasilPemeriksaan: {
@@ -87,6 +94,7 @@ export async function getDaftarKegiatanPemeriksaan() {
       updatedAt: true,
     },
   });
+  revalidatePath("/");
   return pelaksanaan;
 }
 

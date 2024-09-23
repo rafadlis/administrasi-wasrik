@@ -1,14 +1,19 @@
+import { revalidatePath } from "next/cache";
 import { createClient } from "./supabase/client";
 
-export async function uploadDokumen(
-  fileName: string,
-  progres_id: number,
-  file: File
-) {
+export async function uploadDokumen(fileName: string, file: File) {
+  if (file === undefined) {
+    return {
+      header: "Gagal",
+      message: "Dokumen tidak boleh kosong",
+      type: "error",
+    };
+  }
+
   const supabase = createClient();
   const { data, error } = await supabase.storage
     .from("Wasrik")
-    .upload(`${fileName}.${file.name.split(".")[1]}`, file);
+    .upload(`${fileName}.${file.name}`, file);
   if (error) {
     return {
       header: "Gagal",
@@ -16,7 +21,6 @@ export async function uploadDokumen(
       type: "error",
     };
   }
-
   return {
     header: "Berhasil",
     message: "Dokumen berhasil diupload",
@@ -37,6 +41,7 @@ export async function deleteDokumen(fileName: string) {
       type: "error",
     };
   }
+  revalidatePath("/", "layout");
   return {
     header: "Berhasil",
     message: "Dokumen berhasil dihapus",

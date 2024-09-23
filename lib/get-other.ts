@@ -69,3 +69,12 @@ export async function getJurnalPemeriksaan() {
 export type JurnalPemeriksaanType = NonNullable<
   Awaited<ReturnType<typeof getJurnalPemeriksaan>>
 >;
+
+export async function getDokumentasiPemeriksaan() {
+  const dokumentasiPemeriksaan = await db.dokumentasiPemeriksaan.findMany();
+  return dokumentasiPemeriksaan;
+}
+
+export type DokumentasiPemeriksaanType = NonNullable<
+  Awaited<ReturnType<typeof getDokumentasiPemeriksaan>>
+>;

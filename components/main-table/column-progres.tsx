@@ -205,25 +205,23 @@ export function KolomProgres({
                             const fileName = `${kategoriNama} - ${nomorSurat} - ${
                               data.nama_wp
                             } - ${data.NPWPD || "no NPWPD"}`;
-                            await uploadDokumen(
-                              fileName,
-                              progres.id,
-                              file as File
-                            ).then(async (res) => {
-                              if (res.type === "success") {
-                                await updateProgresPemeriksaan(progres.id, {
-                                  file_url: res.data?.fullPath,
-                                }).then((res) => {
-                                  toast.success(res.header, {
+                            await uploadDokumen(fileName, file as File).then(
+                              async (res) => {
+                                if (res.type === "success") {
+                                  await updateProgresPemeriksaan(progres.id, {
+                                    file_url: res.data?.fullPath,
+                                  }).then((res) => {
+                                    toast.success(res.header, {
+                                      description: res.message,
+                                    });
+                                  });
+                                } else {
+                                  toast.error(res.header, {
                                     description: res.message,
                                   });
-                                });
-                              } else {
-                                toast.error(res.header, {
-                                  description: res.message,
-                                });
+                                }
                               }
-                            });
+                            );
                           }
                         }}
                       >

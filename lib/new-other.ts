@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
-import { JurnalPemeriksaanType } from "./get-other";
+import { DokumentasiPemeriksaanType, JurnalPemeriksaanType } from "./get-other";
 
 export async function createTim(data: { nama: string; anggota: string[] }) {
   try {
@@ -28,7 +28,7 @@ export async function createTim(data: { nama: string; anggota: string[] }) {
     };
   }
 
-  revalidatePath("/");
+  revalidatePath("/", "layout");
   return {
     header: "Berhasil Menambahkan Tim",
     message: "Silahkan cek di halaman tim",
@@ -62,7 +62,7 @@ export async function createJurnalPemeriksaan(
     };
   }
 
-  revalidatePath("/");
+  revalidatePath("/", "layout");
   return {
     header: "Berhasil Menambahkan Jurnal",
     message: "Silahkan cek di halaman jurnal",
@@ -88,9 +88,33 @@ export async function updateJurnalPemeriksaan(
     };
   }
 
-  revalidatePath("/");
+  revalidatePath("/", "layout");
   return {
     header: "Berhasil Mengubah Jurnal",
+    message: "Silahkan cek di halaman jurnal",
+    type: "success",
+  };
+}
+
+export async function createDokumentasiJurnal(
+  data: Partial<DokumentasiPemeriksaanType[0]>
+) {
+  try {
+    await db.dokumentasiPemeriksaan.create({
+      data: { ...data },
+    });
+  } catch (error) {
+    console.log(error);
+    return {
+      header: "Gagal Menambahkan Dokumentasi",
+      message: "Coba lagi atau hubungi admin",
+      type: "error",
+    };
+  }
+
+  revalidatePath("/", "layout");
+  return {
+    header: "Berhasil Menambahkan Dokumentasi",
     message: "Silahkan cek di halaman jurnal",
     type: "success",
   };

@@ -401,11 +401,10 @@ model AnggotaTimPemeriksaan {
 model DokumentasiPemeriksaan {
   id                BigInt             @id @default(autoincrement())
   created_at        DateTime           @default(now()) @db.Timestamptz(6)
-  object_id         String?            @db.Uuid
   jurnal_id         BigInt?
   keterangan        String?
+  file_url          String?
   JurnalPemeriksaan JurnalPemeriksaan? @relation(fields: [jurnal_id], references: [id], onDelete: Cascade)
-  objects           objects?           @relation(fields: [object_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@schema("pajak_wasrik")
 }
@@ -811,20 +810,19 @@ model migrations {
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model objects {
-  id                     String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  bucket_id              String?
-  name                   String?
-  owner                  String?                  @db.Uuid
-  created_at             DateTime?                @default(now()) @db.Timestamptz(6)
-  updated_at             DateTime?                @default(now()) @db.Timestamptz(6)
-  last_accessed_at       DateTime?                @default(now()) @db.Timestamptz(6)
-  metadata               Json?
-  path_tokens            String[]                 @default(dbgenerated("string_to_array(name, '/'::text)"))
-  version                String?
-  owner_id               String?
-  user_metadata          Json?
-  DokumentasiPemeriksaan DokumentasiPemeriksaan[]
-  buckets                buckets?                 @relation(fields: [bucket_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "objects_bucketId_fkey")
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  bucket_id        String?
+  name             String?
+  owner            String?   @db.Uuid
+  created_at       DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime? @default(now()) @db.Timestamptz(6)
+  last_accessed_at DateTime? @default(now()) @db.Timestamptz(6)
+  metadata         Json?
+  path_tokens      String[]  @default(dbgenerated("string_to_array(name, '/'::text)"))
+  version          String?
+  owner_id         String?
+  user_metadata    Json?
+  buckets          buckets?  @relation(fields: [bucket_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "objects_bucketId_fkey")
 
   @@unique([bucket_id, name], map: "bucketid_objname")
   @@index([bucket_id, name], map: "idx_objects_bucket_id_name")

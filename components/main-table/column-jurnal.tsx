@@ -4,7 +4,13 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { BookMarked, BookOpenText, PencilLine } from "lucide-react";
+import {
+  BookImage,
+  BookMarked,
+  BookOpenText,
+  ImagePlus,
+  PencilLine,
+} from "lucide-react";
 import { DaftarKegiatanPemeriksaanType } from "@/lib/get-kegiatan";
 import {
   Table,
@@ -17,12 +23,24 @@ import {
 import { Textarea } from "../ui/textarea";
 import { Label } from "../ui/label";
 import {
+  createDokumentasiJurnal,
   createJurnalPemeriksaan,
   updateJurnalPemeriksaan,
 } from "@/lib/new-other";
 import { toast } from "sonner";
 import { Input } from "../ui/input";
 import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
+import { uploadDokumen } from "@/lib/file-action";
+import Image from "next/image";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 export function KolomJurnal({
   data,
@@ -113,6 +131,7 @@ export function KolomJurnal({
               <TableHead>Nama</TableHead>
               <TableHead>Lokasi</TableHead>
               <TableHead>Keterangan</TableHead>
+              <TableHead>Dokumentasi</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -298,6 +317,120 @@ export function KolomJurnal({
                       </form>
                     </PopoverContent>
                   </Popover>
+                </TableCell>
+                {/* MARK: dokumentasi */}
+                <TableCell>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        size="icon"
+                        variant="secondary"
+                        type="button"
+                        className="mr-2"
+                      >
+                        <ImagePlus className="w-4 h-4" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent>
+                      <form
+                        className="flex flex-col gap-2"
+                        action={async (formData) => {
+                          const file = formData.get("file");
+                          if (file) {
+                            const fileName = `Jurnal/${jurnal.tanggal
+                              .toLocaleDateString("id-ID")
+                              .replaceAll("/", "-")} - ${data.nama_wp} - ${
+                              jurnal.lokasi
+                            } - ${jurnal.nama}`;
+                            await uploadDokumen(fileName, file as File).then(
+                              async (res) => {
+                                if (res.type === "success") {
+                                  await createDokumentasiJurnal({
+                                    file_url: res.data?.fullPath,
+                                    jurnal_id: jurnal.id,
+                                  }).then((res) => {
+                                    if (res.type === "success") {
+                                      toast.success(res.header, {
+                                        description: res.message,
+                                      });
+                                    } else {
+                                      toast.error(res.header, {
+                                        description: res.message,
+                                      });
+                                    }
+                                  });
+                                } else {
+                                  toast.error(res.header, {
+                                    description: res.message,
+                                  });
+                                }
+                              }
+                            );
+                          }
+                        }}
+                      >
+                        <Label>Dokumentasi</Label>
+                        <Input type="file" name="file" required />
+                        <Button type="submit">Simpan</Button>
+                      </form>
+                    </PopoverContent>
+                  </Popover>
+                  {/* MARK: view gallery */}
+                  <Dialog>
+                    <DialogTrigger>
+                      <Button size="icon" variant="secondary">
+                        <BookImage className="w-4 h-4" />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-4xl max-h-[90vh]">
+                      <DialogHeader>
+                        <DialogTitle>Galeri Jurnal</DialogTitle>
+                        <DialogDescription>
+                          Daftar foto dari jurnal pemeriksaan
+                        </DialogDescription>
+                      </DialogHeader>
+                      <ScrollArea className="h-[70vh] w-full rounded-md border">
+                        <div className="grid grid-cols-2 gap-4 p-4">
+                          {jurnal.DokumentasiPemeriksaan.map((dok) => (
+                            <figure key={dok.id} className="relative">
+                              <Dialog>
+                                <DialogTrigger>
+                                  <div className="overflow-hidden rounded-md">
+                                    <Image
+                                      src={
+                                        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${dok.file_url}` ||
+                                        ""
+                                      }
+                                      alt="Dokumentasi"
+                                      className="h-[200px] w-full object-cover transition-all hover:scale-105"
+                                      width={300}
+                                      height={200}
+                                    />
+                                  </div>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-3xl max-h-screen flex items-center justify-center">
+                                  <Image
+                                    src={
+                                      `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${dok.file_url}` ||
+                                      ""
+                                    }
+                                    alt="Dokumentasi Full View"
+                                    className="max-w-full max-h-[90vh] object-contain"
+                                    width={1200}
+                                    height={900}
+                                  />
+                                </DialogContent>
+                              </Dialog>
+                              <figcaption className="mt-2 text-xs text-muted-foreground">
+                                {dok.file_url}
+                              </figcaption>
+                            </figure>
+                          ))}
+                        </div>
+                        <ScrollBar orientation="vertical" />
+                      </ScrollArea>
+                    </DialogContent>
+                  </Dialog>
                 </TableCell>
               </TableRow>
             ))}
