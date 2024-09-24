@@ -2,7 +2,6 @@
 
 import { DaftarKegiatanPemeriksaanType } from "@/lib/get-kegiatan";
 import { ColumnDef } from "@tanstack/react-table";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "../ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -25,6 +24,7 @@ import { SheetEditKegiatan } from "../sheet-edit-kegiatan";
 import { KolomProgres } from "./column-progres";
 import { KolomJurnal } from "./column-jurnal";
 import { updateKegiatanPemeriksaan } from "@/lib/update-kegiatan";
+import { KolomHasilPemeriksaan } from "./column-hasil-pemeriksaan";
 
 // TODO: tambah Progress: SP, ST, BA Pertemuan, BAHP, LHP
 // TODO: tambah hasil: skpdkb, Nota Dinas, Bimbingan
@@ -126,6 +126,7 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
         );
       },
     },
+    // MARK: Wajib Pajak
     {
       accessorKey: "wajibPajak",
       header: "Wajib Pajak",
@@ -139,6 +140,7 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
         );
       },
     },
+    // MARK: Objek Pajak
     {
       accessorKey: "objekPajak",
       header: "Objek Pajak",
@@ -147,6 +149,7 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
         return <div>{data.JenisPajak?.nama}</div>;
       },
     },
+    // MARK: Tim
     {
       accessorKey: "tim",
       header: "Tim",
@@ -165,27 +168,13 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
       },
     },
 
+    // MARK: Hasil Pemeriksaan
     {
       accessorKey: "hasilPemeriksaan",
       header: "Hasil Pemeriksaan",
-      cell: ({ row }) => {
-        const data = row.original;
-        return (
-          <Badge
-            variant={
-              data.KategoriHasilPemeriksaan?.keterangan === "Kurang Bayar"
-                ? "default"
-                : data.KategoriHasilPemeriksaan?.keterangan === "Lebih Bayar" ||
-                  !data.KategoriHasilPemeriksaan?.keterangan
-                ? "destructive"
-                : "outline"
-            }
-          >
-            {data.KategoriHasilPemeriksaan?.keterangan || "Belum ada"}
-          </Badge>
-        );
-      },
+      cell: ({ row }) => <KolomHasilPemeriksaan data={row.original} />,
     },
+    // MARK: Menu
     {
       accessorKey: "menu",
       header: "Menu",
