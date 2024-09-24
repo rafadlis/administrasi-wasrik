@@ -106,7 +106,7 @@ export function KolomJurnal({
                   <Input type="date" name="tanggal" />
                 </fieldset>
                 <fieldset className="flex flex-col gap-2">
-                  <Label className="text-muted-foreground">Nama</Label>
+                  <Label className="text-muted-foreground">Nama Kegiatan</Label>
                   <Input type="text" name="nama" />
                 </fieldset>
                 <fieldset className="flex flex-col gap-2">
@@ -128,14 +128,16 @@ export function KolomJurnal({
           <TableHeader>
             <TableRow>
               <TableHead>Tanggal</TableHead>
-              <TableHead>Nama</TableHead>
+              <TableHead>Nama Kegiatan</TableHead>
               <TableHead>Lokasi</TableHead>
               <TableHead>Keterangan</TableHead>
               <TableHead>Dokumentasi</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.JurnalPemeriksaan.map((jurnal) => (
+            {data.JurnalPemeriksaan.sort(
+              (a, b) => b.tanggal.getTime() - a.tanggal.getTime()
+            ).map((jurnal) => (
               <TableRow key={jurnal.id}>
                 <TableCell>
                   {/* MARK: edit tanggal */}
