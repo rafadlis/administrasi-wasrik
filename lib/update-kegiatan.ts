@@ -38,18 +38,21 @@ export async function updateProgresPemeriksaan(
   data: Partial<ProgresPemeriksaan>
 ) {
   try {
-    const existingNomorSurat = await db.progresPemeriksaan.findUnique({
-      where: { nomor_surat: data.nomor_surat || "" },
-      select: {
-        nomor_surat: true,
-      },
-    });
-    if (existingNomorSurat) {
-      return {
-        header: "Nomor surat sudah ada",
-        message: "Gunakan nomor surat yang lain",
-        type: "warning",
-      };
+    if (data.nomor_surat) {
+      const existingNomorSurat = await db.progresPemeriksaan.findUnique({
+        where: { nomor_surat: data.nomor_surat || "" },
+        select: {
+          nomor_surat: true,
+        },
+      });
+
+      if (existingNomorSurat) {
+        return {
+          header: "Nomor surat sudah ada",
+          message: "Gunakan nomor surat yang lain",
+          type: "warning",
+        };
+      }
     }
     const updatedData = await db.progresPemeriksaan.update({
       where: { id },
