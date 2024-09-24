@@ -15,7 +15,7 @@ export type DaftarKegiatanNoRelationType = NonNullable<
 export async function getDaftarKegiatanPemeriksaan(search: string | undefined) {
   const pelaksanaan = await db.kegiatanPemeriksaan.findMany({
     orderBy: {
-      updatedAt: "desc",
+      masa_pajak_awal: "desc",
     },
     where: {
       OR: [
@@ -56,6 +56,7 @@ export async function getDaftarKegiatanPemeriksaan(search: string | undefined) {
       jumlah_kenaikan: true,
       persentase_kenaikan: true,
       estimasi_presentasi_kenaikan: true,
+      kategori_hasil_pemeriksaan_id: true,
       JenisPajak: {
         select: {
           id: true,

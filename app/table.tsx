@@ -1,4 +1,4 @@
-import { columnsPelaksanaan } from "@/components/main-table/columns-pelaksanaan";
+import { columnsPelaksanaan } from "@/components/main-table/columns-kegiatan";
 import { DataTable } from "@/components/main-table/data-tables";
 import { getDaftarKegiatanPemeriksaan } from "@/lib/get-kegiatan";
 
