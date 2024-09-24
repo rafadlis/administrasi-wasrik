@@ -14,17 +14,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { FolderOpen } from "lucide-react";
+import { Delete, FolderOpen } from "lucide-react";
 import { DaftarKegiatanPemeriksaanType } from "@/lib/get-kegiatan";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Upload } from "lucide-react";
 import { ScanEye } from "lucide-react";
 import { Trash } from "lucide-react";
+import { Plus } from "lucide-react";
 import { deleteDokumen, uploadDokumen } from "@/lib/file-action";
 import { toast } from "sonner";
 import { updateProgresPemeriksaan } from "@/lib/update-kegiatan";
 import Link from "next/link";
+import {
+  createProgresPemeriksaan,
+  deleteProgresPemeriksaan,
+} from "@/lib/new-kegiatan";
 
 export function KolomProgres({
   data,
@@ -39,6 +44,60 @@ export function KolomProgres({
         </Button>
       </PopoverTrigger>
       <PopoverContent align="start" side="left" className="w-full">
+        <div className="flex flex-row gap-2 items-center">
+          <div>Progres Pemeriksaan</div>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button size="sm" variant="outline">
+                <Plus className="w-3 h-3 mr-2" /> Tambah Proses
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="flex flex-col gap-2">
+              <form
+                className="w-full"
+                action={async () => {
+                  const kategoriProgresId = 2;
+                  await createProgresPemeriksaan({
+                    kegiatan_pemeriksaan_id: data.id,
+                    kategori_progres_id: kategoriProgresId,
+                  });
+                }}
+              >
+                <Button
+                  type="submit"
+                  variant="outline"
+                  className="justify-start w-full"
+                >
+                  SP
+                  <span className="ml-1 text-muted-foreground">
+                    (Surat Pemberitahuan)
+                  </span>
+                </Button>
+              </form>
+              <form
+                className="w-full"
+                action={async () => {
+                  const kategoriProgresId = 3;
+                  await createProgresPemeriksaan({
+                    kegiatan_pemeriksaan_id: data.id,
+                    kategori_progres_id: kategoriProgresId,
+                  });
+                }}
+              >
+                <Button
+                  type="submit"
+                  variant="outline"
+                  className="justify-start w-full"
+                >
+                  BAP
+                  <span className="ml-1 text-muted-foreground">
+                    (Berita Acara Pemeriksaan)
+                  </span>
+                </Button>
+              </form>
+            </PopoverContent>
+          </Popover>
+        </div>
         <Table className="w-full">
           <TableHeader>
             <TableRow>
@@ -51,9 +110,10 @@ export function KolomProgres({
           </TableHeader>
           <TableBody>
             {data.ProgresPemeriksaan?.sort((a, b) => {
+              // Sort by tanggal_surat in descending order (most recent first)
               return (
-                (a.KategoriProgresPemeriksaan?.id ?? 0) -
-                (b.KategoriProgresPemeriksaan?.id ?? 0)
+                (a.tanggal_surat?.getTime() ?? 0) -
+                (b.tanggal_surat?.getTime() ?? 0)
               );
             }).map((progres) => (
               <TableRow key={progres.id}>
@@ -74,6 +134,8 @@ export function KolomProgres({
                           progres.tanggal_surat &&
                           progres.file_url
                             ? "bg-green-500"
+                            : progres.nomor_surat && progres.tanggal_surat
+                            ? "bg-blue-500"
                             : "bg-yellow-500"
                         }`}
                       ></div>
@@ -83,11 +145,26 @@ export function KolomProgres({
                           progres.tanggal_surat &&
                           progres.file_url
                             ? "bg-green-500"
+                            : progres.nomor_surat && progres.tanggal_surat
+                            ? "bg-blue-500"
                             : "bg-yellow-500"
                         }`}
                       ></div>
                     </div>
                     <div>{progres.KategoriProgresPemeriksaan?.nama}</div>
+                    {(progres.KategoriProgresPemeriksaan?.id === 2 ||
+                      progres.KategoriProgresPemeriksaan?.id === 3) && (
+                      <Button
+                        size="icon"
+                        variant="link"
+                        className="group p-0"
+                        onClick={async () => {
+                          await deleteProgresPemeriksaan(progres.id);
+                        }}
+                      >
+                        <Delete className="w-4 h-4 text-muted-foreground/40 group-hover:text-red-500" />
+                      </Button>
+                    )}
                   </div>
                 </TableCell>
                 {/* MARK: NS */}

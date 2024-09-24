@@ -129,3 +129,51 @@ export async function undoDeleteKegiatan(
     type: "success",
   };
 }
+
+export async function createProgresPemeriksaan(data: {
+  kegiatan_pemeriksaan_id: number;
+  kategori_progres_id: number;
+}) {
+  try {
+    await db.progresPemeriksaan.create({
+      data: {
+        ...data,
+        updatedAt: new Date(),
+      },
+    });
+  } catch (error) {
+    return {
+      header: "Gagal",
+      message: "Gagal menambahkan progres, " + error,
+      type: "error",
+    };
+  }
+  revalidatePath("/");
+  return {
+    header: "Berhasil",
+    message: "Progres telah ditambahkan",
+    type: "success",
+  };
+}
+
+export async function deleteProgresPemeriksaan(id: number) {
+  try {
+    await db.progresPemeriksaan.delete({
+      where: {
+        id,
+      },
+    });
+  } catch (error) {
+    return {
+      header: "Gagal",
+      message: "Gagal menghapus progres, " + error,
+      type: "error",
+    };
+  }
+  revalidatePath("/");
+  return {
+    header: "Berhasil",
+    message: "Progres telah dihapus",
+    type: "success",
+  };
+}
