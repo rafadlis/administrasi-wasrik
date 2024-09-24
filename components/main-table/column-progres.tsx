@@ -159,7 +159,19 @@ export function KolomProgres({
                         variant="link"
                         className="group p-0"
                         onClick={async () => {
-                          await deleteProgresPemeriksaan(progres.id);
+                          await deleteProgresPemeriksaan(progres.id).then(
+                            (res) => {
+                              if (res.type === "success") {
+                                toast.success(res.header, {
+                                  description: res.message,
+                                });
+                              } else {
+                                toast.error(res.header, {
+                                  description: res.message,
+                                });
+                              }
+                            }
+                          );
                         }}
                       >
                         <Delete className="w-4 h-4 text-muted-foreground/40 group-hover:text-red-500" />
@@ -188,6 +200,10 @@ export function KolomProgres({
                             }).then((res) => {
                               if (res.type === "success") {
                                 toast.success(res.header, {
+                                  description: res.message,
+                                });
+                              } else if (res.type === "warning") {
+                                toast.warning(res.header, {
                                   description: res.message,
                                 });
                               } else {

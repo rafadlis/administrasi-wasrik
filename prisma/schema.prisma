@@ -131,27 +131,26 @@ model KlasifikasiSudut {
 }
 
 model KodeBayar {
-  id             String          @id
-  npwpd          String
-  jenis_pajak_id Int
-  masa_awal      DateTime
-  masa_akhir     DateTime?
-  nominal        BigInt
-  objek_pajak_id Int
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime
-  kadaluarsa     DateTime
-  terbayar       DateTime?
-  nominal_sanksi BigInt?
-  terbayar_id    String?
-  surat_id       Int?
-  JurnalDebit    JurnalDebit[]
-  JenisPajak     JenisPajak      @relation(fields: [jenis_pajak_id], references: [id])
-  ObjekPajak     ObjekPajak      @relation(fields: [objek_pajak_id], references: [id])
-  Surat          Surat?          @relation(fields: [surat_id], references: [id])
-  RiwayatSetoran RiwayatSetoran? @relation(fields: [terbayar_id], references: [id])
-  SKPD           SKPD[]
-  SPTPD          SPTPD[]
+  id                     String                   @id
+  npwpd                  String
+  jenis_pajak_id         Int
+  masa_awal              DateTime
+  masa_akhir             DateTime?
+  nominal                BigInt
+  objek_pajak_id         Int
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime
+  kadaluarsa             DateTime
+  terbayar               DateTime?
+  nominal_sanksi         BigInt?
+  surat_id               Int?
+  JurnalDebit            JurnalDebit[]
+  JenisPajak             JenisPajak               @relation(fields: [jenis_pajak_id], references: [id])
+  ObjekPajak             ObjekPajak               @relation(fields: [objek_pajak_id], references: [id])
+  Surat                  Surat?                   @relation(fields: [surat_id], references: [id])
+  SetoranPembayaranPajak SetoranPembayaranPajak[]
+  SKPD                   SKPD[]
+  SPTPD                  SPTPD[]
 
   @@schema("pajak_admin")
 }
@@ -210,31 +209,15 @@ model Reklame_HargaDasarUkuran {
   @@schema("pajak_admin")
 }
 
-model RiwayatSetoran {
-  id             String      @id
-  kode_bayar_id  String?
-  referensi_lain String?
-  nominal        BigInt
-  createAt       DateTime    @default(now())
-  updateAt       DateTime
-  KodeBayar      KodeBayar[]
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model SetoranPembayaranPajak {
+  id            String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at    DateTime   @default(now()) @db.Timestamptz(6)
+  kode_bayar_id String?
+  nominal       BigInt?
+  KodeBayar     KodeBayar? @relation(fields: [kode_bayar_id], references: [id], onDelete: Cascade)
 
   @@schema("pajak_admin")
-}
-
-model InformasiKontak {
-  id               Int           @id @default(autoincrement())
-  badan_id         String?
-  orang_pribadi_id String?
-  email            String?
-  nomor_hp         String?
-  status           String?
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime
-  Badan            Badan?        @relation(fields: [badan_id], references: [id])
-  OrangPribadi     OrangPribadi? @relation(fields: [orang_pribadi_id], references: [id])
-
-  @@schema("pajak_general")
 }
 
 model JenisPajak {
@@ -248,6 +231,30 @@ model JenisPajak {
   KodeBayar                 KodeBayar[]
   ObjekPajak                ObjekPajak[]
   KegiatanPemeriksaan       KegiatanPemeriksaan[]
+
+  @@schema("pajak_general")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model KontakEmail {
+  id                BigInt      @id @default(autoincrement())
+  created_at        DateTime    @default(now()) @db.Timestamptz(6)
+  wajib_pajak_id    Int?
+  email             String?
+  email_verified_at DateTime?   @db.Timestamptz(6)
+  WajibPajak        WajibPajak? @relation(fields: [wajib_pajak_id], references: [id])
+
+  @@schema("pajak_general")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model KontakTelepon {
+  id             BigInt      @id @default(autoincrement())
+  wajib_pajak_id Int?
+  no_telepon     String?
+  verified_at    DateTime?   @db.Timestamptz(6)
+  created_at     DateTime    @default(now()) @db.Timestamptz(6)
+  WajibPajak     WajibPajak? @relation(fields: [wajib_pajak_id], references: [id])
 
   @@schema("pajak_general")
 }
@@ -312,16 +319,18 @@ model StatusAktif {
 }
 
 model WajibPajak {
-  id               Int           @id @default(autoincrement())
+  id               Int             @id @default(autoincrement())
   orang_pribadi_id String?
   badan_id         String?
-  NPWPD            String        @unique
-  createdAt        DateTime      @default(now())
+  NPWPD            String          @unique
+  createdAt        DateTime        @default(now())
   updatedAt        DateTime
+  KontakEmail      KontakEmail[]
+  KontakTelepon    KontakTelepon[]
   ObjekPajak       ObjekPajak[]
   StatusAktif      StatusAktif[]
-  Badan            Badan?        @relation(fields: [badan_id], references: [id])
-  OrangPribadi     OrangPribadi? @relation(fields: [orang_pribadi_id], references: [id])
+  Badan            Badan?          @relation(fields: [badan_id], references: [id])
+  OrangPribadi     OrangPribadi?   @relation(fields: [orang_pribadi_id], references: [id])
 
   @@schema("pajak_general")
 }
@@ -484,7 +493,7 @@ model ProgresPemeriksaan {
   surat_id                   Int?
   kegiatan_pemeriksaan_id    Int
   kategori_progres_id        Int
-  nomor_surat                String?
+  nomor_surat                String?                    @unique
   tanggal_surat              DateTime?
   keterangan                 String?
   createdAt                  DateTime                   @default(now())
@@ -509,8 +518,8 @@ model TimPemeriksaan {
 }
 
 model Badan {
-  id                  String            @id
-  NIB                 String            @unique
+  id                  String          @id
+  NIB                 String          @unique
   kode_provinsi       String
   kode_kabupaten      String
   kode_kecamatan      String
@@ -518,17 +527,16 @@ model Badan {
   RT                  String
   RW                  String
   alamat              String
-  createdAt           DateTime          @default(now())
+  createdAt           DateTime        @default(now())
   nama_badan          String
-  nomor_urut          Int               @default(autoincrement())
-  updatedAt           DateTime          @default(now())
-  InformasiKontak     InformasiKontak[]
+  nomor_urut          Int             @default(autoincrement())
+  updatedAt           DateTime        @default(now())
   PengurusBadan       PengurusBadan[]
   WajibPajak          WajibPajak[]
-  Provinsi            Provinsi          @relation(fields: [kode_provinsi], references: [kode_provinsi])
-  Kabupaten           Kabupaten         @relation(fields: [kode_provinsi, kode_kabupaten], references: [kode_provinsi, kode_kabupaten])
-  Kecamatan           Kecamatan         @relation(fields: [kode_provinsi, kode_kabupaten, kode_kecamatan], references: [kode_provinsi, kode_kabupaten, kode_kecamatan])
-  DesaKelurahan       DesaKelurahan     @relation(fields: [kode_provinsi, kode_kabupaten, kode_kecamatan, kode_desa_kelurahan], references: [kode_provinsi, kode_kabupaten, kode_kecamatan, kode_desa_kelurahan])
+  Provinsi            Provinsi        @relation(fields: [kode_provinsi], references: [kode_provinsi])
+  Kabupaten           Kabupaten       @relation(fields: [kode_provinsi, kode_kabupaten], references: [kode_provinsi, kode_kabupaten])
+  Kecamatan           Kecamatan       @relation(fields: [kode_provinsi, kode_kabupaten, kode_kecamatan], references: [kode_provinsi, kode_kabupaten, kode_kecamatan])
+  DesaKelurahan       DesaKelurahan   @relation(fields: [kode_provinsi, kode_kabupaten, kode_kecamatan, kode_desa_kelurahan], references: [kode_provinsi, kode_kabupaten, kode_kecamatan, kode_desa_kelurahan])
 
   @@schema("public")
 }
@@ -710,8 +718,8 @@ model Kecamatan {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model OrangPribadi {
-  id                  String            @id
-  NIK                 String            @unique
+  id                  String          @id
+  NIK                 String          @unique
   nama                String
   kode_provinsi       String
   kode_kabupaten      String
@@ -720,16 +728,15 @@ model OrangPribadi {
   RT                  String
   RW                  String
   alamat              String
-  createdAt           DateTime          @default(now())
-  nomor_urut          Int               @default(autoincrement())
+  createdAt           DateTime        @default(now())
+  nomor_urut          Int             @default(autoincrement())
   updatedAt           DateTime
-  InformasiKontak     InformasiKontak[]
   PengurusBadan       PengurusBadan[]
   WajibPajak          WajibPajak[]
-  Provinsi            Provinsi          @relation(fields: [kode_provinsi], references: [kode_provinsi])
-  Kabupaten           Kabupaten         @relation(fields: [kode_provinsi, kode_kabupaten], references: [kode_provinsi, kode_kabupaten])
-  Kecamatan           Kecamatan         @relation(fields: [kode_provinsi, kode_kabupaten, kode_kecamatan], references: [kode_provinsi, kode_kabupaten, kode_kecamatan])
-  DesaKelurahan       DesaKelurahan     @relation(fields: [kode_provinsi, kode_kabupaten, kode_kecamatan, kode_desa_kelurahan], references: [kode_provinsi, kode_kabupaten, kode_kecamatan, kode_desa_kelurahan])
+  Provinsi            Provinsi        @relation(fields: [kode_provinsi], references: [kode_provinsi])
+  Kabupaten           Kabupaten       @relation(fields: [kode_provinsi, kode_kabupaten], references: [kode_provinsi, kode_kabupaten])
+  Kecamatan           Kecamatan       @relation(fields: [kode_provinsi, kode_kabupaten, kode_kecamatan], references: [kode_provinsi, kode_kabupaten, kode_kecamatan])
+  DesaKelurahan       DesaKelurahan   @relation(fields: [kode_provinsi, kode_kabupaten, kode_kecamatan, kode_desa_kelurahan], references: [kode_provinsi, kode_kabupaten, kode_kecamatan, kode_desa_kelurahan])
 
   @@schema("public")
 }
