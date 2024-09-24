@@ -12,10 +12,42 @@ export type DaftarKegiatanNoRelationType = NonNullable<
   Awaited<ReturnType<typeof getDaftarKegiatanNoRelation>>
 >;
 
-export async function getDaftarKegiatanPemeriksaan() {
+export async function getDaftarKegiatanPemeriksaan(search: string | undefined) {
   const pelaksanaan = await db.kegiatanPemeriksaan.findMany({
     orderBy: {
       updatedAt: "desc",
+    },
+    where: {
+      OR: [
+        {
+          nama_wp: {
+            contains: search,
+            mode: "insensitive",
+          },
+        },
+        {
+          NPWPD: {
+            contains: search,
+            mode: "insensitive",
+          },
+        },
+        {
+          JenisPajak: {
+            nama: {
+              contains: search,
+              mode: "insensitive",
+            },
+          },
+        },
+        {
+          TimPemeriksaan: {
+            nama: {
+              contains: search,
+              mode: "insensitive",
+            },
+          },
+        },
+      ],
     },
     select: {
       id: true,

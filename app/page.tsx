@@ -7,11 +7,17 @@ import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logout } from "@/lib/logout";
 import { NewTimDialog } from "@/components/new-tim-dialog";
+import { SearchBar } from "@/components/main-table/search-bar";
+
 // import ProgressValueCard from "@/components/progress-value-card";
 // import { BarChartMultipleCard } from "@/components/bar-chart-multiple";
 // import { BarChartMultiple } from "@/components/bar-chart-multiple";
 
-export default async function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined };
+}) {
   const supabase = createClient();
   const { data } = await supabase.auth.getUser();
   return (
@@ -30,12 +36,15 @@ export default async function Home() {
         </div>
       </section>
       <section className="flex flex-col gap-3">
-        <div className="flex flex-row justify-end gap-3">
-          <NewTimDialog buttonVariant="outline" />
-          <NewKegiatanDialog />
+        <div className="flex flex-row gap-3">
+          <SearchBar />
+          <div className="flex flex-row justify-end gap-3">
+            <NewTimDialog buttonVariant="outline" />
+            <NewKegiatanDialog />
+          </div>
         </div>
         <Suspense fallback={<TableSkeleton row={10} column={8} />}>
-          <DaftarKegiatanTable />
+          <DaftarKegiatanTable search={searchParams.search} />
         </Suspense>
       </section>
     </main>
