@@ -53,7 +53,11 @@ export function SheetEditKegiatan({
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button size="icon" variant="secondary">
+        <Button
+          size="icon"
+          variant="ghost"
+          className="text-muted-foreground hover:text-foreground"
+        >
           <Pencil className="w-4 h-4" />
         </Button>
       </SheetTrigger>

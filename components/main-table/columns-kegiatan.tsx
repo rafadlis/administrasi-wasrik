@@ -26,9 +26,83 @@ import { KolomJurnal } from "./column-jurnal";
 import { updateKegiatanPemeriksaan } from "@/lib/update-kegiatan";
 import { KolomHasilPemeriksaan } from "./column-hasil-pemeriksaan";
 import { Badge } from "../ui/badge";
+import { Progress } from "../ui/progress";
 
-// TODO: tambah Progress: SP, ST, BA Pertemuan, BAHP, LHP
-// TODO: tambah hasil: skpdkb, Nota Dinas, Bimbingan
+// Define a recursive type for countable fields
+type CountableField<T> = {
+  [K in keyof T]?: T[K] extends (infer U)[]
+    ? [CountableField<U>]
+    : T[K] extends object
+    ? CountableField<T[K]>
+    : boolean;
+};
+
+// Specify which fields to count, including nested ones
+const fieldsToCount: CountableField<DaftarKegiatanPemeriksaanType[0]> = {
+  masa_pajak_awal: true,
+  masa_pajak_akhir: true,
+  kategori_hasil_pemeriksaan_id: true,
+  keterangan: true,
+  tim_id: true,
+  ProgresPemeriksaan: [
+    {
+      tanggal_surat: true,
+      nomor_surat: true,
+      file_url: true,
+    },
+  ],
+};
+
+function countNullValues<T extends object>(
+  obj: T,
+  fields: CountableField<T>
+): number {
+  let count = 0;
+  for (const key in fields) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      const value = fields[key];
+      if (obj[key as keyof T] === null) {
+        count++;
+      } else if (Array.isArray(obj[key as keyof T]) && Array.isArray(value)) {
+        (obj[key as keyof T] as unknown[]).forEach((item) => {
+          count += countNullValues(item as object, value[0]);
+        });
+      } else if (typeof value === "object" && value !== null) {
+        count += countNullValues(
+          obj[key as keyof T] as object,
+          value as CountableField<object>
+        );
+      }
+    }
+  }
+  return count;
+}
+
+function countAllValues<T extends object>(
+  obj: T,
+  fields: CountableField<T>
+): number {
+  let count = 0;
+  for (const key in fields) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      const value = fields[key];
+      if (typeof value === "boolean") {
+        count++;
+      } else if (Array.isArray(obj[key as keyof T]) && Array.isArray(value)) {
+        (obj[key as keyof T] as unknown[]).forEach((item) => {
+          count += countAllValues(item as object, value[0]);
+        });
+      } else if (typeof value === "object" && value !== null) {
+        count += countAllValues(
+          obj[key as keyof T] as object,
+          value as CountableField<object>
+        );
+      }
+    }
+  }
+  return count;
+}
+
 export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
   [
     // MARK: Waktu Pemeriksaan
@@ -55,23 +129,44 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
           return currentDate && currentDate < minDate ? currentDate : minDate;
         }, new Date());
 
+        // Calculate the number of days between maxDate and minDate
+        const daysDifference = Math.ceil(
+          (maxDate.getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24)
+        );
+
         return (
-          <div className="flex flex-col">
-            <span>
-              {maxDate.toLocaleDateString("id-ID", {
-                day: "2-digit",
-                month: "long",
-                year: "numeric",
-              })}
-            </span>
-            <span className="text-xs text-muted-foreground">
-              s/d{" "}
-              {minDate.toLocaleDateString("id-ID", {
-                day: "2-digit",
-                month: "long",
-                year: "numeric",
-              })}
-            </span>
+          <div className="flex flex-row gap-2 items-center min-w-44">
+            <Badge
+              variant={`${
+                daysDifference > 90
+                  ? "destructive"
+                  : daysDifference > 60
+                  ? "warning"
+                  : daysDifference < 30
+                  ? "default"
+                  : "outline"
+              }`}
+            >
+              {daysDifference}
+              <span className="text-xs text-muted-foreground">h</span>
+            </Badge>
+            <div className="flex flex-col">
+              <span>
+                {minDate.toLocaleDateString("id-ID", {
+                  day: "2-digit",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                s/d{" "}
+                {maxDate.toLocaleDateString("id-ID", {
+                  day: "2-digit",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </span>
+            </div>
           </div>
         );
       },
@@ -85,7 +180,7 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
         const data = row.original;
         return (
           <Popover>
-            <PopoverTrigger className="flex flex-col">
+            <PopoverTrigger className="flex flex-col min-w-28">
               {data.masa_pajak_awal?.toLocaleDateString("id-ID", {
                 month: "long",
                 year: "numeric",
@@ -184,6 +279,40 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
       header: "Hasil Pemeriksaan",
       cell: ({ row }) => <KolomHasilPemeriksaan data={row.original} />,
     },
+    // MARK: Status Progres
+    {
+      accessorKey: "statusProgres",
+      header: "Status Progres",
+      cell: ({ row }) => {
+        const data = row.original;
+        const countNull = countNullValues(data, fieldsToCount);
+        const countAll = countAllValues(data, fieldsToCount);
+        const countDone = countAll - countNull;
+        const precentageDone = (countDone / countAll) * 100;
+        return (
+          <div className="flex flex-col gap-1 w-32">
+            <span className="flex flex-row justify-between">
+              <span className="text-xs">{precentageDone.toFixed(0)}%</span>
+              <span className="text-xs text-muted-foreground">
+                {countDone} / {countAll}
+              </span>
+            </span>
+            <Progress
+              value={precentageDone}
+              max={100}
+              className={`${
+                precentageDone === 100
+                  ? "[&>*]:bg-green-500"
+                  : precentageDone > 60
+                  ? "[&>*]:bg-primary bg-primary/15"
+                  : "[&>*]:bg-destructive bg-destructive/15"
+              }`}
+            />
+          </div>
+        );
+      },
+    },
+
     // MARK: Menu
     {
       accessorKey: "menu",
@@ -198,7 +327,11 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
             <SheetEditKegiatan data={data} />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button size="icon" variant="secondary">
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="relative text-muted-foreground hover:text-foreground"
+                >
                   <Ellipsis className="w-4 h-4" />
                 </Button>
               </DropdownMenuTrigger>

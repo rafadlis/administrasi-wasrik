@@ -47,18 +47,33 @@ export function KolomJurnal({
 }: {
   data: DaftarKegiatanPemeriksaanType[0];
 }) {
-  const [isNewJurnalOpen, setIsNewJurnalOpen] = useState(false);
+  const [isJurnalOpen, setIsJurnalOpen] = useState(false);
   return (
-    <Popover>
+    <Popover open={isJurnalOpen} onOpenChange={setIsJurnalOpen}>
       <PopoverTrigger asChild>
-        <Button size="icon" variant="secondary">
+        <Button
+          size="icon"
+          variant={isJurnalOpen ? "default" : "ghost"}
+          className="relative group"
+        >
           <BookMarked className="w-4 h-4" />
+          <div
+            className={`${
+              data.JurnalPemeriksaan.length > 0
+                ? "bg-primary text-primary-foreground"
+                : "bg-destructive text-destructive-foreground"
+            } absolute -top-0.5 -right-0.5 text-[0.5rem] rounded-full w-3 h-3 flex items-center justify-center ${
+              isJurnalOpen ? "opacity-0" : "opacity-100"
+            } transition-all`}
+          >
+            {data.JurnalPemeriksaan.length}
+          </div>
         </Button>
       </PopoverTrigger>
       <PopoverContent align="start" side="left" className="w-full">
         <div className="flex justify-between items-center">
           <div className="font-semibold">Jurnal Pemeriksaan</div>
-          <Popover open={isNewJurnalOpen} onOpenChange={setIsNewJurnalOpen}>
+          <Popover>
             <PopoverTrigger asChild>
               <Button type="button" size="sm">
                 + Tambah Jurnal
@@ -91,7 +106,7 @@ export function KolomJurnal({
                         toast.success(res.header, {
                           description: res.message,
                         });
-                        setIsNewJurnalOpen(false);
+                        setIsJurnalOpen(false);
                       } else {
                         toast.error(res.header, {
                           description: res.message,
@@ -142,8 +157,15 @@ export function KolomJurnal({
                 <TableCell>
                   {/* MARK: edit tanggal */}
                   <Popover>
-                    <PopoverTrigger className="text-left underline-offset-4 hover:underline">
-                      {jurnal.tanggal.toLocaleDateString("id-ID")}
+                    <PopoverTrigger
+                      className={`"text-left underline-offset-4 hover:underline ${
+                        jurnal.tanggal.toLocaleDateString("id-ID")
+                          ? ""
+                          : "text-muted-foreground"
+                      }`}
+                    >
+                      {jurnal.tanggal.toLocaleDateString("id-ID") ||
+                        "klik untuk edit"}
                     </PopoverTrigger>
                     <PopoverContent>
                       <form
@@ -170,9 +192,9 @@ export function KolomJurnal({
                         <Input
                           type="date"
                           name="tanggal"
-                          defaultValue={jurnal.tanggal.toLocaleDateString(
-                            "id-ID"
-                          )}
+                          defaultValue={
+                            jurnal.tanggal.toISOString().split("T")[0]
+                          }
                         />
                         <Button type="submit">Simpan</Button>
                       </form>
@@ -182,8 +204,12 @@ export function KolomJurnal({
                 <TableCell>
                   <Popover>
                     {/* MARK: edit nama */}
-                    <PopoverTrigger className="text-left underline-offset-4 hover:underline">
-                      {jurnal.nama}
+                    <PopoverTrigger
+                      className={`"text-left underline-offset-4 hover:underline ${
+                        jurnal.nama ? "" : "text-muted-foreground"
+                      }`}
+                    >
+                      {jurnal.nama || "klik untuk edit"}
                     </PopoverTrigger>
                     <PopoverContent>
                       <form

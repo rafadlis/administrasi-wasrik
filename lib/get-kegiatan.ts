@@ -61,7 +61,6 @@ export async function getDaftarKegiatanPemeriksaan(search: string | undefined) {
       jumlah_kenaikan: true,
       persentase_kenaikan: true,
       estimasi_presentasi_kenaikan: true,
-      kategori_hasil_pemeriksaan_id: true,
       JenisPajak: {
         select: {
           id: true,
@@ -86,6 +85,7 @@ export async function getDaftarKegiatanPemeriksaan(search: string | undefined) {
           },
         },
       },
+      kategori_hasil_pemeriksaan_id: true,
       KategoriHasilPemeriksaan: {
         select: {
           id: true,
@@ -110,7 +110,7 @@ export async function getDaftarKegiatanPemeriksaan(search: string | undefined) {
           file_url: true,
         },
       },
-
+      tim_id: true,
       TimPemeriksaan: {
         select: {
           id: true,

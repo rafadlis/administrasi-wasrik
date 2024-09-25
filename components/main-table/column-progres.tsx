@@ -30,16 +30,22 @@ import {
   createProgresPemeriksaan,
   deleteProgresPemeriksaan,
 } from "@/lib/new-kegiatan";
+import { useState } from "react";
 
 export function KolomProgres({
   data,
 }: {
   data: DaftarKegiatanPemeriksaanType[0];
 }) {
+  const [isOpen, setIsOpen] = useState(false);
   return (
-    <Popover>
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button size="icon" variant="secondary">
+        <Button
+          size="icon"
+          variant={isOpen ? "default" : "ghost"}
+          className="relative"
+        >
           <FolderOpen className="w-4 h-4" />
         </Button>
       </PopoverTrigger>
