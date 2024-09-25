@@ -25,30 +25,58 @@ import { KolomProgres } from "./column-progres";
 import { KolomJurnal } from "./column-jurnal";
 import { updateKegiatanPemeriksaan } from "@/lib/update-kegiatan";
 import { KolomHasilPemeriksaan } from "./column-hasil-pemeriksaan";
+import { Badge } from "../ui/badge";
 
 // TODO: tambah Progress: SP, ST, BA Pertemuan, BAHP, LHP
 // TODO: tambah hasil: skpdkb, Nota Dinas, Bimbingan
 export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
   [
-    // {
-    //   accessorKey: "terakhirDiubah",
-    //   header: "Terakhir Diubah",
-    //   cell: ({ row }) => {
-    //     const data = row.original;
-    //     return (
-    //       <div className="flex flex-col">
-    //         {data.updatedAt?.toLocaleDateString("id-ID", {
-    //           day: "2-digit",
-    //           month: "2-digit",
-    //           year: "numeric",
-    //         })}
-    //         <span className="text-xs text-muted-foreground">
-    //           {data.updatedAt?.toLocaleTimeString("id-ID")}
-    //         </span>
-    //       </div>
-    //     );
-    //   },
-    // },
+    // MARK: Waktu Pemeriksaan
+    {
+      accessorKey: "waktuKegiatan",
+      header: "Waktu Kegiatan",
+      cell: ({ row }) => {
+        const data = row.original;
+        const hasValidDates = data.ProgresPemeriksaan.some(
+          (progres) => progres.tanggal_surat
+        );
+
+        if (!hasValidDates) {
+          return <Badge variant="destructive">Belum ada tanggal</Badge>;
+        }
+
+        const maxDate = data.ProgresPemeriksaan.reduce((maxDate, progres) => {
+          const currentDate = progres.tanggal_surat;
+          return currentDate && currentDate > maxDate ? currentDate : maxDate;
+        }, new Date(0));
+
+        const minDate = data.ProgresPemeriksaan.reduce((minDate, progres) => {
+          const currentDate = progres.tanggal_surat;
+          return currentDate && currentDate < minDate ? currentDate : minDate;
+        }, new Date());
+
+        return (
+          <div className="flex flex-col">
+            <span>
+              {maxDate.toLocaleDateString("id-ID", {
+                day: "2-digit",
+                month: "long",
+                year: "numeric",
+              })}
+            </span>
+            <span className="text-xs text-muted-foreground">
+              s/d{" "}
+              {minDate.toLocaleDateString("id-ID", {
+                day: "2-digit",
+                month: "long",
+                year: "numeric",
+              })}
+            </span>
+          </div>
+        );
+      },
+    },
+
     // MARK: Masa Pajak
     {
       accessorKey: "masaPajak",
@@ -147,24 +175,6 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
       cell: ({ row }) => {
         const data = row.original;
         return <div>{data.JenisPajak?.nama}</div>;
-      },
-    },
-    // MARK: Tim
-    {
-      accessorKey: "tim",
-      header: "Tim",
-      cell: ({ row }) => {
-        const data = row.original;
-        return (
-          <div className="flex flex-col">
-            <span>{data.TimPemeriksaan?.nama}</span>
-            <span className="text-sm text-muted-foreground">
-              {data.TimPemeriksaan?.AnggotaTimPemeriksaan?.map(
-                (petugas) => petugas.Pegawai.panggilan
-              ).join(", ")}
-            </span>
-          </div>
-        );
       },
     },
 
