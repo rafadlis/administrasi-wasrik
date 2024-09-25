@@ -65,6 +65,7 @@ export async function getDaftarKegiatanPemeriksaan(search: string | undefined) {
         select: {
           id: true,
           nama: true,
+          kode_pajak: true,
         },
       },
       masa_pajak_awal: true,
@@ -140,3 +141,8 @@ export async function getDaftarKegiatanPemeriksaan(search: string | undefined) {
 export type DaftarKegiatanPemeriksaanType = NonNullable<
   Awaited<ReturnType<typeof getDaftarKegiatanPemeriksaan>>
 >;
+
+export async function getTotalKegiatan() {
+  const total = await db.kegiatanPemeriksaan.count();
+  return total;
+}

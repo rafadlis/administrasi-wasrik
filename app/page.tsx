@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Logout } from "@/lib/logout";
 import { NewTimDialog } from "@/components/new-tim-dialog";
 import { SearchBar } from "@/components/main-table/search-bar";
+import { TotalKegiatan } from "@/components/calc/total-kegiatan";
 
 // import ProgressValueCard from "@/components/progress-value-card";
 // import { BarChartMultipleCard } from "@/components/bar-chart-multiple";
@@ -36,8 +37,9 @@ export default async function Home({
         </div>
       </section>
       <section className="flex flex-col gap-3">
-        <div className="flex flex-row gap-3">
+        <div className="flex flex-row gap-3 items-center">
           <SearchBar />
+          <TotalKegiatan />
           <div className="flex flex-row justify-end gap-3">
             <NewTimDialog buttonVariant="outline" />
             <NewKegiatanDialog />
