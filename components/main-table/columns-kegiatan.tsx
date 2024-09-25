@@ -265,11 +265,18 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
     },
     // MARK: Objek Pajak
     {
-      accessorKey: "objekPajak",
-      header: "Objek Pajak",
+      accessorKey: "jenisPajak",
+      header: "Jenis Pajak",
       cell: ({ row }) => {
         const data = row.original;
-        return <div>{data.JenisPajak?.nama}</div>;
+        return (
+          <>
+            <div className="hidden xl:block">{data.JenisPajak?.nama}</div>
+            <Badge variant="outline" className="xl:hidden">
+              {data.JenisPajak?.kode_pajak}
+            </Badge>
+          </>
+        );
       },
     },
 
