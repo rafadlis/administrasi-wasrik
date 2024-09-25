@@ -1,5 +1,5 @@
 import { NewKegiatanDialog } from "@/components/new-pemeriksaan-form";
-import DaftarKegiatanTable from "../components/main-table/table";
+import DaftarKegiatanTable from "../components/main-table/table-component";
 import { Suspense } from "react";
 import { TableSkeleton } from "@/components/table-skeleton";
 import { createClient } from "@/lib/supabase/server";
