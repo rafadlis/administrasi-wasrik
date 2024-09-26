@@ -6,6 +6,7 @@ import { Progress } from "../ui/progress";
 export async function TotalKegiatan() {
   const total = await getTotalKegiatan();
   const target = 48;
+  const percent = (total / target) * 100;
   return (
     <div className="flex flex-col gap-1">
       <Suspense fallback={<Skeleton className="w-10 h-4" />}>
@@ -14,8 +15,7 @@ export async function TotalKegiatan() {
         }`}</div>
       </Suspense>
       <Progress
-        value={total}
-        max={target}
+        value={percent}
         className="[&>*]:bg-green-500 bg-green-500/20"
       />
     </div>
