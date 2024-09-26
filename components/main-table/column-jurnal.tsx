@@ -8,6 +8,7 @@ import {
   BookImage,
   BookMarked,
   BookOpenText,
+  Delete,
   ImagePlus,
   PencilLine,
 } from "lucide-react";
@@ -25,6 +26,8 @@ import { Label } from "../ui/label";
 import {
   createDokumentasiJurnal,
   createJurnalPemeriksaan,
+  deleteJurnalPemeriksaan,
+  undoDeleteJurnalPemeriksaan,
   updateJurnalPemeriksaan,
 } from "@/lib/new-other";
 import { toast } from "sonner";
@@ -41,13 +44,23 @@ import {
 import { uploadDokumen } from "@/lib/file-action";
 import Image from "next/image";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 export function KolomJurnal({
   data,
 }: {
   data: DaftarKegiatanPemeriksaanType[0];
 }) {
   const [isJurnalOpen, setIsJurnalOpen] = useState(false);
+  const [isCreateJurnalOpen, setIsCreateJurnalOpen] = useState(false);
   return (
     <Popover open={isJurnalOpen} onOpenChange={setIsJurnalOpen}>
       <PopoverTrigger asChild>
@@ -73,7 +86,10 @@ export function KolomJurnal({
       <PopoverContent align="start" side="left" className="w-full">
         <div className="flex justify-between items-center">
           <div className="font-semibold">Jurnal Pemeriksaan</div>
-          <Popover>
+          <Popover
+            open={isCreateJurnalOpen}
+            onOpenChange={setIsCreateJurnalOpen}
+          >
             <PopoverTrigger asChild>
               <Button type="button" size="sm">
                 + Tambah Jurnal
@@ -106,7 +122,7 @@ export function KolomJurnal({
                         toast.success(res.header, {
                           description: res.message,
                         });
-                        setIsJurnalOpen(false);
+                        setIsCreateJurnalOpen(false);
                       } else {
                         toast.error(res.header, {
                           description: res.message,
@@ -154,7 +170,7 @@ export function KolomJurnal({
               (a, b) => b.tanggal.getTime() - a.tanggal.getTime()
             ).map((jurnal) => (
               <TableRow key={jurnal.id}>
-                <TableCell>
+                <TableCell className="flex flex-row gap-2">
                   {/* MARK: edit tanggal */}
                   <Popover>
                     <PopoverTrigger
@@ -200,6 +216,62 @@ export function KolomJurnal({
                       </form>
                     </PopoverContent>
                   </Popover>
+                  <AlertDialog>
+                    <AlertDialogTrigger>
+                      <Delete className="w-4 h-4 text-muted-foreground/70 hover:text-destructive transition-all" />
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Hapus Jurnal ini?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Menghapus jurnal ini akan menghapus semua data kecuali
+                          foto-foto yang terkait dengan jurnal ini.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Batal</AlertDialogCancel>
+                        <form
+                          action={async () => {
+                            await deleteJurnalPemeriksaan(
+                              Number(jurnal.id)
+                            ).then((res) => {
+                              if (res.type === "success" && res.deletedData) {
+                                toast.success(res.header, {
+                                  description: res.message,
+                                  action: {
+                                    label: "Batal",
+                                    onClick: async () => {
+                                      await undoDeleteJurnalPemeriksaan(
+                                        res.deletedData
+                                      ).then((res) => {
+                                        if (res.type === "success") {
+                                          toast.success(res.header, {
+                                            description: res.message,
+                                          });
+                                        } else {
+                                          toast.error(res.header, {
+                                            description: res.message,
+                                          });
+                                        }
+                                      });
+                                    },
+                                  },
+                                });
+                              } else {
+                                toast.error(res.header, {
+                                  description: res.message,
+                                });
+                              }
+                            });
+                          }}
+                        >
+                          <Button type="submit" variant="destructive">
+                            Hapus
+                          </Button>
+                        </form>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </TableCell>
                 <TableCell>
                   <Popover>
@@ -287,7 +359,7 @@ export function KolomJurnal({
                   {jurnal.keterangan && (
                     <Popover>
                       <PopoverTrigger>
-                        <Button size="icon" variant="secondary">
+                        <Button size="icon" variant="ghost">
                           <BookOpenText className="w-4 h-4" />
                         </Button>
                       </PopoverTrigger>
@@ -303,7 +375,7 @@ export function KolomJurnal({
                   {/* MARK: edit keterangan */}
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button size="icon" variant="secondary">
+                      <Button size="icon" variant="ghost">
                         <PencilLine className="w-4 h-4" />
                       </Button>
                     </PopoverTrigger>
@@ -352,7 +424,7 @@ export function KolomJurnal({
                     <PopoverTrigger asChild>
                       <Button
                         size="icon"
-                        variant="secondary"
+                        variant="ghost"
                         type="button"
                         className="mr-2"
                       >
@@ -404,62 +476,65 @@ export function KolomJurnal({
                     </PopoverContent>
                   </Popover>
                   {/* MARK: view gallery */}
-                  <Dialog>
-                    <DialogTrigger>
-                      <Button size="icon" variant="secondary">
-                        <BookImage className="w-4 h-4" />
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-4xl max-h-[90vh]">
-                      <DialogHeader>
-                        <DialogTitle>Galeri Jurnal</DialogTitle>
-                        <DialogDescription>
-                          Daftar foto dari jurnal pemeriksaan
-                        </DialogDescription>
-                      </DialogHeader>
-                      <ScrollArea className="h-[70vh] w-full rounded-md border">
-                        <div className="grid grid-cols-2 gap-4 p-4">
-                          {jurnal.DokumentasiPemeriksaan.map((dok) => (
-                            <figure key={dok.id} className="relative">
-                              <Dialog>
-                                <DialogTrigger>
-                                  <div className="overflow-hidden rounded-md">
+                  {jurnal.DokumentasiPemeriksaan.length > 0 && (
+                    <Dialog>
+                      <DialogTrigger>
+                        <Button size="icon" variant="ghost">
+                          <BookImage className="w-4 h-4" />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-4xl max-h-[90vh]">
+                        <DialogHeader>
+                          <DialogTitle>Galeri Jurnal</DialogTitle>
+                          <DialogDescription>
+                            Daftar foto dari jurnal pemeriksaan
+                          </DialogDescription>
+                        </DialogHeader>
+                        <ScrollArea className="h-[70vh] w-full rounded-md border">
+                          <div className="grid grid-cols-2 gap-4 p-4">
+                            {jurnal.DokumentasiPemeriksaan.map((dok) => (
+                              <figure key={dok.id} className="relative">
+                                <Dialog>
+                                  <DialogTrigger>
+                                    <div className="overflow-hidden rounded-md">
+                                      <Image
+                                        src={
+                                          `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${dok.file_url}` ||
+                                          ""
+                                        }
+                                        alt="Dokumentasi"
+                                        className="h-[200px] w-full object-cover transition-all hover:scale-105"
+                                        width={300}
+                                        height={200}
+                                      />
+                                    </div>
+                                  </DialogTrigger>
+                                  <DialogContent className="max-w-3xl max-h-screen flex items-center justify-center">
                                     <Image
                                       src={
                                         `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${dok.file_url}` ||
                                         ""
                                       }
-                                      alt="Dokumentasi"
-                                      className="h-[200px] w-full object-cover transition-all hover:scale-105"
-                                      width={300}
-                                      height={200}
+                                      alt="Dokumentasi Full View"
+                                      className="max-w-full max-h-[90vh] object-contain"
+                                      width={1200}
+                                      height={900}
                                     />
-                                  </div>
-                                </DialogTrigger>
-                                <DialogContent className="max-w-3xl max-h-screen flex items-center justify-center">
-                                  <Image
-                                    src={
-                                      `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${dok.file_url}` ||
-                                      ""
-                                    }
-                                    alt="Dokumentasi Full View"
-                                    className="max-w-full max-h-[90vh] object-contain"
-                                    width={1200}
-                                    height={900}
-                                  />
-                                </DialogContent>
-                              </Dialog>
-                              <figcaption className="mt-2 text-xs text-muted-foreground">
-                                {dok.file_url}
-                              </figcaption>
-                            </figure>
-                          ))}
-                        </div>
-                        <ScrollBar orientation="vertical" />
-                      </ScrollArea>
-                    </DialogContent>
-                  </Dialog>
+                                  </DialogContent>
+                                </Dialog>
+                                <figcaption className="mt-2 text-xs text-muted-foreground">
+                                  {dok.file_url}
+                                </figcaption>
+                              </figure>
+                            ))}
+                          </div>
+                          <ScrollBar orientation="vertical" />
+                        </ScrollArea>
+                      </DialogContent>
+                    </Dialog>
+                  )}
                 </TableCell>
+                {/* MARK: delete Jurnal */}
               </TableRow>
             ))}
           </TableBody>

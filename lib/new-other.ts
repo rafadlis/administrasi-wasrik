@@ -119,3 +119,52 @@ export async function createDokumentasiJurnal(
     type: "success",
   };
 }
+
+export async function deleteJurnalPemeriksaan(id: number) {
+  let data;
+  try {
+    data = await db.jurnalPemeriksaan.delete({
+      where: { id: id },
+    });
+  } catch (error) {
+    console.log(error);
+    return {
+      header: "Gagal Menghapus Jurnal",
+      message: "Coba lagi atau hubungi admin",
+      type: "error",
+      deletedData: null,
+    };
+  }
+
+  revalidatePath("/", "layout");
+  return {
+    header: "Berhasil Menghapus Jurnal",
+    message: "Silahkan cek di halaman jurnal",
+    type: "success",
+    deletedData: data,
+  };
+}
+
+export async function undoDeleteJurnalPemeriksaan(
+  data: JurnalPemeriksaanType[0]
+) {
+  try {
+    await db.jurnalPemeriksaan.create({
+      data: { ...data },
+    });
+  } catch (error) {
+    console.log(error);
+    return {
+      header: "Gagal Mengembalikan Jurnal",
+      message: "Coba lagi atau hubungi admin",
+      type: "error",
+    };
+  }
+
+  revalidatePath("/", "layout");
+  return {
+    header: "Berhasil Mengembalikan Jurnal",
+    message: "Silahkan cek di halaman jurnal",
+    type: "success",
+  };
+}
