@@ -4,11 +4,41 @@ import { getDaftarKegiatanPemeriksaan } from "@/lib/get-kegiatan";
 
 export default async function DaftarKegiatanTable({
   search,
+  selectedYear,
+  selectedMonth,
 }: {
   search: string | string[] | undefined;
+  selectedYear: number | undefined;
+  selectedMonth: number | undefined;
 }) {
   const unsortedData = await getDaftarKegiatanPemeriksaan(search as string);
-  const data = unsortedData.sort((a, b) => {
+
+  const filteredData = unsortedData.filter((item) => {
+    const dates = item.ProgresPemeriksaan.map((p) => p.tanggal_surat).filter(
+      (date) => date !== null && date !== undefined
+    );
+
+    if (dates.length === 0) return true; // Include items with no dates
+
+    const minDate = new Date(
+      Math.min(...dates.map((d) => new Date(d).getTime()))
+    );
+
+    if (selectedYear && selectedMonth) {
+      return (
+        minDate.getFullYear() === selectedYear &&
+        minDate.getMonth() === selectedMonth - 1
+      );
+    } else if (selectedYear) {
+      return minDate.getFullYear() === selectedYear;
+    } else if (selectedMonth) {
+      return minDate.getMonth() === selectedMonth - 1;
+    }
+
+    return true; // If both selectedYear and selectedMonth are blank, include all
+  });
+
+  const data = filteredData.sort((a, b) => {
     const latestDateA = Math.max(
       ...a.ProgresPemeriksaan.map((p) =>
         p.tanggal_surat ? new Date(p.tanggal_surat).getTime() : -Infinity
