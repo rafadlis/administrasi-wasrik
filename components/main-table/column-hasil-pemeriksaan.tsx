@@ -62,7 +62,7 @@ export function KolomHasilPemeriksaan({
           className={`order-last text-muted-foreground flex flex-row gap-2 justify-center items-center ${
             percentChange > 100
               ? "text-green-700"
-              : percentChange < 0
+              : percentChange <= 0
               ? "text-red-500"
               : "text-muted-foreground"
           }`}
