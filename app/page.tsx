@@ -25,7 +25,7 @@ export default async function Home({
   const { data } = await supabase.auth.getUser();
   return (
     <main className="flex flex-col max-w-screen-xl mx-auto w-full py-3 gap-3">
-      <section className="flex flex-row gap-3">
+      <section className="flex flex-row gap-3 print:hidden">
         <form action={Logout}>
           <Button type="submit" variant="outline" size="icon">
             <LogOut className="w-4 h-4" />
@@ -39,7 +39,7 @@ export default async function Home({
         </div>
       </section>
       <section className="flex flex-col gap-3">
-        <div className="flex flex-row gap-3 items-center">
+        <div className="flex flex-row gap-3 items-center print:hidden">
           <SearchBar />
           <MonthFilter
             selectedMonth={Number(searchParams.month)}

@@ -292,7 +292,7 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
     // MARK: Status Progres
     {
       accessorKey: "statusProgres",
-      header: "Status Progres",
+      header: () => <div className="print:hidden">Status Progres</div>,
       cell: ({ row }) => {
         const data = row.original;
         const countNull = countNullValues(data, fieldsToCount);
@@ -300,7 +300,7 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
         const countDone = countAll - countNull;
         const precentageDone = (countDone / countAll) * 100;
         return (
-          <div className="flex flex-col gap-1 w-32">
+          <div className="flex flex-col gap-1 w-32 print:hidden">
             <span className="flex flex-row justify-between">
               <span className="text-xs">{precentageDone.toFixed(0)}%</span>
               <span className="text-xs text-muted-foreground">
@@ -326,11 +326,11 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
     // MARK: Menu
     {
       accessorKey: "menu",
-      header: "Menu",
+      header: () => <div className="print:hidden">Menu</div>,
       cell: ({ row }) => {
         const data = row.original;
         return (
-          <div className="flex gap-2">
+          <div className="flex gap-2 print:hidden">
             {/* MARK: Progres */}
             <KolomProgres data={data} />
             <KolomJurnal data={data} />
