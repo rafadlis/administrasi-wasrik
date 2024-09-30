@@ -270,12 +270,12 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
       cell: ({ row }) => {
         const data = row.original;
         return (
-          <>
+          <div>
             <div className="hidden xl:block">{data.JenisPajak?.nama}</div>
             <Badge variant="outline" className="xl:hidden">
               {data.JenisPajak?.kode_pajak}
             </Badge>
-          </>
+          </div>
         );
       },
     },
@@ -284,7 +284,10 @@ export const columnsPelaksanaan: ColumnDef<DaftarKegiatanPemeriksaanType[0]>[] =
     {
       accessorKey: "hasilPemeriksaan",
       header: "Hasil Pemeriksaan",
-      cell: ({ row }) => <KolomHasilPemeriksaan data={row.original} />,
+      cell: ({ row }) => {
+        const data = row.original;
+        return <KolomHasilPemeriksaan data={data} />;
+      },
     },
     // MARK: Status Progres
     {

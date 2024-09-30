@@ -91,6 +91,7 @@ export async function getDaftarKegiatanPemeriksaan(search: string | undefined) {
         select: {
           id: true,
           keterangan: true,
+          singkatan: true,
         },
       },
       ProgresPemeriksaan: {

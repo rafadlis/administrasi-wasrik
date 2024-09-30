@@ -442,11 +442,14 @@ model JurnalPemeriksaan {
   @@schema("pajak_wasrik")
 }
 
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model KategoriHasilPemeriksaan {
   id                  Int                   @id @default(autoincrement())
   keterangan          String
   createdAt           DateTime              @default(now())
   updatedAt           DateTime
+  singkatan           String?               @db.VarChar
   KegiatanPemeriksaan KegiatanPemeriksaan[]
 
   @@schema("pajak_wasrik")
@@ -518,8 +521,8 @@ model TimPemeriksaan {
 }
 
 model Badan {
-  id                  String          @id
-  NIB                 String          @unique
+  id                  String                    @id
+  NIB                 String                    @unique
   kode_provinsi       String
   kode_kabupaten      String
   kode_kecamatan      String
@@ -527,16 +530,17 @@ model Badan {
   RT                  String
   RW                  String
   alamat              String
-  createdAt           DateTime        @default(now())
+  createdAt           DateTime                  @default(now())
   nama_badan          String
-  nomor_urut          Int             @default(autoincrement())
-  updatedAt           DateTime        @default(now())
+  nomor_urut          Int                       @default(autoincrement())
+  updatedAt           DateTime                  @default(now())
+  koordinat           Unsupported("geography")?
   PengurusBadan       PengurusBadan[]
   WajibPajak          WajibPajak[]
-  Provinsi            Provinsi        @relation(fields: [kode_provinsi], references: [kode_provinsi])
-  Kabupaten           Kabupaten       @relation(fields: [kode_provinsi, kode_kabupaten], references: [kode_provinsi, kode_kabupaten])
-  Kecamatan           Kecamatan       @relation(fields: [kode_provinsi, kode_kabupaten, kode_kecamatan], references: [kode_provinsi, kode_kabupaten, kode_kecamatan])
-  DesaKelurahan       DesaKelurahan   @relation(fields: [kode_provinsi, kode_kabupaten, kode_kecamatan, kode_desa_kelurahan], references: [kode_provinsi, kode_kabupaten, kode_kecamatan, kode_desa_kelurahan])
+  Provinsi            Provinsi                  @relation(fields: [kode_provinsi], references: [kode_provinsi])
+  Kabupaten           Kabupaten                 @relation(fields: [kode_provinsi, kode_kabupaten], references: [kode_provinsi, kode_kabupaten])
+  Kecamatan           Kecamatan                 @relation(fields: [kode_provinsi, kode_kabupaten, kode_kecamatan], references: [kode_provinsi, kode_kabupaten, kode_kecamatan])
+  DesaKelurahan       DesaKelurahan             @relation(fields: [kode_provinsi, kode_kabupaten, kode_kecamatan, kode_desa_kelurahan], references: [kode_provinsi, kode_kabupaten, kode_kecamatan, kode_desa_kelurahan])
 
   @@schema("public")
 }
@@ -716,10 +720,11 @@ model Kecamatan {
   @@schema("public")
 }
 
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model OrangPribadi {
-  id                  String          @id
-  NIK                 String          @unique
+  id                  String                    @id
+  NIK                 String                    @unique
   nama                String
   kode_provinsi       String
   kode_kabupaten      String
@@ -728,15 +733,16 @@ model OrangPribadi {
   RT                  String
   RW                  String
   alamat              String
-  createdAt           DateTime        @default(now())
-  nomor_urut          Int             @default(autoincrement())
+  createdAt           DateTime                  @default(now())
+  nomor_urut          Int                       @default(autoincrement())
   updatedAt           DateTime
+  koordinat           Unsupported("geography")?
   PengurusBadan       PengurusBadan[]
   WajibPajak          WajibPajak[]
-  Provinsi            Provinsi        @relation(fields: [kode_provinsi], references: [kode_provinsi])
-  Kabupaten           Kabupaten       @relation(fields: [kode_provinsi, kode_kabupaten], references: [kode_provinsi, kode_kabupaten])
-  Kecamatan           Kecamatan       @relation(fields: [kode_provinsi, kode_kabupaten, kode_kecamatan], references: [kode_provinsi, kode_kabupaten, kode_kecamatan])
-  DesaKelurahan       DesaKelurahan   @relation(fields: [kode_provinsi, kode_kabupaten, kode_kecamatan, kode_desa_kelurahan], references: [kode_provinsi, kode_kabupaten, kode_kecamatan, kode_desa_kelurahan])
+  Provinsi            Provinsi                  @relation(fields: [kode_provinsi], references: [kode_provinsi])
+  Kabupaten           Kabupaten                 @relation(fields: [kode_provinsi, kode_kabupaten], references: [kode_provinsi, kode_kabupaten])
+  Kecamatan           Kecamatan                 @relation(fields: [kode_provinsi, kode_kabupaten, kode_kecamatan], references: [kode_provinsi, kode_kabupaten, kode_kecamatan])
+  DesaKelurahan       DesaKelurahan             @relation(fields: [kode_provinsi, kode_kabupaten, kode_kecamatan, kode_desa_kelurahan], references: [kode_provinsi, kode_kabupaten, kode_kecamatan, kode_desa_kelurahan])
 
   @@schema("public")
 }
