@@ -163,116 +163,25 @@ function NewKegiatanForm({ onSuccess }: { onSuccess: () => void }) {
   };
 
   return (
-    <>
+    <main>
       <Progress value={(step / totalSteps) * 100} />
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="flex flex-col gap-4"
+          className="flex flex-col gap-4 mt-6"
         >
-          {/* MARK: step 2 */}
+          {/* MARK: step 1 */}
           {step === 1 && (
-            <>
-              <FormField
-                control={form.control}
-                name="NPWPD"
-                render={({ field }) => {
-                  return (
-                    <FormItem>
-                      <FormLabel>NPWPD</FormLabel>
-                      <Popover>
-                        <PopoverTrigger
-                          asChild
-                          disabled={isLoadingDaftarWP || errorDaftarWP}
-                        >
-                          <FormControl>
-                            <Button
-                              variant={"outline"}
-                              className={`w-full ${
-                                !field.value ? "text-muted-foreground" : ""
-                              }`}
-                            >
-                              <span>
-                                {isLoadingDaftarWP || errorDaftarWP
-                                  ? "Memuat..."
-                                  : field.value
-                                  ? daftarWP.find(
-                                      (wp) => wp.ObyekBadanNo === field.value
-                                    )?.ObyekBadanNo
-                                  : "Cari NPWPD"}
-                              </span>
-                              <ChevronsUpDown className="ml-auto h-4 w-4" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-full p-0">
-                          <Command>
-                            <CommandInput placeholder="Cari Provinsi" />
-                            <CommandList>
-                              <CommandEmpty>Tidak ditemukan</CommandEmpty>
-                              <CommandGroup className="">
-                                {daftarWP.map((wp) => (
-                                  <CommandItem
-                                    key={wp.ObyekBadanNo}
-                                    value={wp.NamaBadan}
-                                    onSelect={() => {
-                                      field.onChange(wp.ObyekBadanNo);
-                                      form.setValue("nama_wp", wp.NamaBadan);
-                                    }}
-                                  >
-                                    <div className="flex flex-col">
-                                      <span>{wp.NamaBadan}</span>
-                                      <span className="text-xs text-muted-foreground">
-                                        {wp.ObyekBadanNo}, {wp.AlamatBadan}
-                                      </span>
-                                    </div>
-                                    <Check
-                                      className={` ml-auto h-3 w-3 ${
-                                        field.value === wp.ObyekBadanNo
-                                          ? "opacity-100"
-                                          : "opacity-0"
-                                      }`}
-                                    />
-                                  </CommandItem>
-                                ))}
-                              </CommandGroup>
-                            </CommandList>
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  );
-                }}
-              />
-              <FormField
-                name="nama_wp"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Nama WP</FormLabel>
-                    <Input {...field} />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button
-                variant="outline"
-                type="button"
-                onClick={() => {
-                  form.setValue("NPWPD", "");
-                  form.setValue("nama_wp", "");
-                }}
-                className="ml-auto"
-              >
-                Batal Pilih WP
-              </Button>
+            <section className="flex flex-col gap-4">
               <FormField
                 name="jenis_pajak_id"
                 control={form.control}
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Jenis Pajak</FormLabel>
+                    <FormLabel className="text-muted-foreground">
+                      {/* MARK: jenis Pajak */}
+                      Jenis Pajak
+                    </FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value?.toString()}
@@ -302,19 +211,135 @@ function NewKegiatanForm({ onSuccess }: { onSuccess: () => void }) {
                   </FormItem>
                 )}
               />
-            </>
+              {form.watch("jenis_pajak_id")?.toString() !== "7" && (
+                <FormField
+                  control={form.control}
+                  name="NPWPD"
+                  render={({ field }) => {
+                    return (
+                      <FormItem>
+                        <FormLabel className="text-muted-foreground">
+                          {/* MARK: NPWPD */}
+                          NPWPD
+                        </FormLabel>
+                        <Popover>
+                          <PopoverTrigger
+                            asChild
+                            disabled={
+                              isLoadingDaftarWP ||
+                              errorDaftarWP ||
+                              form.watch("jenis_pajak_id")?.toString() ===
+                                "7" ||
+                              !form.watch("jenis_pajak_id")
+                            }
+                          >
+                            <FormControl>
+                              <Button
+                                variant={"outline"}
+                                className={`w-full ${
+                                  !field.value ? "text-muted-foreground" : ""
+                                }`}
+                              >
+                                <span>
+                                  {isLoadingDaftarWP || errorDaftarWP
+                                    ? "Memuat..."
+                                    : field.value
+                                    ? daftarWP.find(
+                                        (wp) => wp.ObyekBadanNo === field.value
+                                      )?.ObyekBadanNo
+                                    : "Cari NPWPD"}
+                                </span>
+                                <ChevronsUpDown className="ml-auto h-4 w-4" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-full p-0">
+                            <Command>
+                              <CommandInput placeholder="Cari NPWPD" />
+                              <CommandList>
+                                <CommandEmpty>Tidak ditemukan</CommandEmpty>
+                                <CommandGroup className="">
+                                  {daftarWP.map((wp) => (
+                                    <CommandItem
+                                      key={wp.ObyekBadanNo}
+                                      value={wp.NamaBadan}
+                                      onSelect={() => {
+                                        field.onChange(wp.ObyekBadanNo);
+                                        form.setValue("nama_wp", wp.NamaBadan);
+                                      }}
+                                    >
+                                      <div className="flex flex-col">
+                                        <span>{wp.NamaBadan}</span>
+                                        <span className="text-xs text-muted-foreground">
+                                          {wp.ObyekBadanNo}, {wp.AlamatBadan}
+                                        </span>
+                                      </div>
+                                      <Check
+                                        className={` ml-auto h-3 w-3 ${
+                                          field.value === wp.ObyekBadanNo
+                                            ? "opacity-100"
+                                            : "opacity-0"
+                                        }`}
+                                      />
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
+                />
+              )}
+              <FormField
+                name="nama_wp"
+                control={form.control}
+                disabled={
+                  isLoadingDaftarWP ||
+                  errorDaftarWP ||
+                  !form.watch("jenis_pajak_id")
+                }
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel className="text-muted-foreground">
+                      {/* MARK: Nama WP */}
+                      Nama WP
+                    </FormLabel>
+                    <Input {...field} />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button
+                variant="outline"
+                type="button"
+                onClick={() => {
+                  form.setValue("NPWPD", "");
+                  form.setValue("nama_wp", "");
+                }}
+                className="ml-auto"
+              >
+                Batal Pilih WP
+              </Button>
+            </section>
           )}
 
           {/* MARK: step 2 */}
 
           {step === 2 && (
-            <>
+            <section className="flex flex-col gap-4">
               <FormField
                 name="hasil_pemeriksaan_id"
                 control={form.control}
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Hasil Pemeriksaan</FormLabel>
+                    <FormLabel className="text-muted-foreground">
+                      {/* MARK: Hasil Pemeriksaan */}
+                      Hasil Pemeriksaan
+                    </FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value?.toString()}
@@ -351,7 +376,10 @@ function NewKegiatanForm({ onSuccess }: { onSuccess: () => void }) {
                 control={form.control}
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Tim</FormLabel>
+                    <FormLabel className="text-muted-foreground">
+                      {/* MARK: Tim */}
+                      Tim
+                    </FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value?.toString()}
@@ -376,19 +404,22 @@ function NewKegiatanForm({ onSuccess }: { onSuccess: () => void }) {
                   </FormItem>
                 )}
               />
-            </>
+            </section>
           )}
 
           {/* MARK: step 3 */}
 
           {step === 3 && (
-            <>
+            <section className="flex flex-col gap-4">
               <FormField
                 name="masa_pajak_awal"
                 control={form.control}
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Masa Pajak Awal</FormLabel>
+                    <FormLabel className="text-muted-foreground">
+                      {/* MARK: Masa Pajak Awal */}
+                      Masa Pajak Awal
+                    </FormLabel>
                     <CalendarSelect
                       field={field}
                       isFuture={false}
@@ -403,7 +434,10 @@ function NewKegiatanForm({ onSuccess }: { onSuccess: () => void }) {
                 control={form.control}
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Masa Pajak Akhir</FormLabel>
+                    <FormLabel className="text-muted-foreground">
+                      {/* MARK: Masa Pajak Akhir */}
+                      Masa Pajak Akhir
+                    </FormLabel>
                     <CalendarSelect
                       field={field}
                       isFuture={false}
@@ -414,58 +448,28 @@ function NewKegiatanForm({ onSuccess }: { onSuccess: () => void }) {
                   </FormItem>
                 )}
               />
-            </>
+            </section>
           )}
 
           {/* MARK: step 4 */}
 
           {step === 4 && (
-            <>
+            <section className="flex flex-col gap-4">
               <FormField
                 name="keterangan"
                 control={form.control}
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Keterangan</FormLabel>
-                    <Textarea {...field} />
+                    <FormLabel className="text-muted-foreground">
+                      {/* MARK: Keterangan */}
+                      Keterangan
+                    </FormLabel>
+                    <Textarea {...field} className="h-40" />
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <FormField
-                name="jumlah_kenaikan"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Jumlah Kenaikan (Rp)</FormLabel>
-                    <Input {...field} type="number" />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                name="persentase_kenaikan"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Persentase Kenaikan (%)</FormLabel>
-                    <Input {...field} type="number" />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                name="estimasi_presentasi_kenaikan"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Estimasi Presentasi Kenaikan (%)</FormLabel>
-                    <Input {...field} type="number" />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </>
+            </section>
           )}
 
           {/* MARK: Button */}
@@ -499,6 +503,6 @@ function NewKegiatanForm({ onSuccess }: { onSuccess: () => void }) {
           </div>
         </form>
       </Form>
-    </>
+    </main>
   );
 }
