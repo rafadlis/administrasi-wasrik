@@ -81,7 +81,7 @@ export function KolomHasilPemeriksaan({
           ) : (
             <TrendingDown
               className={`w-3 h-3 ${
-                percentChange < 0 ? "text-red-500" : "text-muted-foreground"
+                percentChange <= 0 ? "text-red-500" : "text-muted-foreground"
               }`}
             />
           )}
