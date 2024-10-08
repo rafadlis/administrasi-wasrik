@@ -6,36 +6,39 @@ export default async function DaftarKegiatanTable({
   search,
   selectedYear,
   selectedMonth,
+  selectedJenisPajakId,
 }: {
-  search: string | string[] | undefined;
+  search: string | undefined;
   selectedYear: number | undefined;
   selectedMonth: number | undefined;
+  selectedJenisPajakId: string | undefined;
 }) {
-  const unsortedData = await getDaftarKegiatanPemeriksaan(search as string);
+  const unsortedData = await getDaftarKegiatanPemeriksaan(search);
 
   const filteredData = unsortedData.filter((item) => {
     const dates = item.ProgresPemeriksaan.map((p) => p.tanggal_surat).filter(
-      (date) => date !== null && date !== undefined
+      Boolean
     );
+    const minDate =
+      dates.length > 0
+        ? new Date(
+            Math.min(
+              ...dates.map((d) =>
+                d ? new Date(d).getTime() : Number.MAX_SAFE_INTEGER
+              )
+            )
+          )
+        : null;
 
-    if (dates.length === 0) return true; // Include items with no dates
+    const yearMatch =
+      !selectedYear || (minDate && minDate.getFullYear() === selectedYear);
+    const monthMatch =
+      !selectedMonth || (minDate && minDate.getMonth() === selectedMonth - 1);
+    const jenisPajakMatch =
+      !selectedJenisPajakId ||
+      item.JenisPajak?.id?.toString() === selectedJenisPajakId;
 
-    const minDate = new Date(
-      Math.min(...dates.map((d) => new Date(d).getTime()))
-    );
-
-    if (selectedYear && selectedMonth) {
-      return (
-        minDate.getFullYear() === selectedYear &&
-        minDate.getMonth() === selectedMonth - 1
-      );
-    } else if (selectedYear) {
-      return minDate.getFullYear() === selectedYear;
-    } else if (selectedMonth) {
-      return minDate.getMonth() === selectedMonth - 1;
-    }
-
-    return true; // If both selectedYear and selectedMonth are blank, include all
+    return yearMatch && monthMatch && jenisPajakMatch;
   });
 
   const data = filteredData.sort((a, b) => {
@@ -49,13 +52,8 @@ export default async function DaftarKegiatanTable({
         p.tanggal_surat ? new Date(p.tanggal_surat).getTime() : -Infinity
       )
     );
-
-    // If A has all blank dates and B doesn't, A should come first
-    if (latestDateA === -Infinity && latestDateB !== -Infinity) return -1;
-    // If B has all blank dates and A doesn't, B should come first
-    if (latestDateB === -Infinity && latestDateA !== -Infinity) return 1;
-    // Otherwise, sort in descending order (latest first)
     return latestDateB - latestDateA;
   });
+
   return <DataTable columns={columnsPelaksanaan} data={data} />;
 }

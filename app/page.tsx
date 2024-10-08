@@ -11,6 +11,7 @@ import { SearchBar } from "@/components/main-table/search-bar";
 import { TotalKegiatan } from "@/components/calc/total-kegiatan";
 import { FilterYear } from "@/components/filter-year";
 import { MonthFilter } from "@/components/filter-month";
+import FilterJenisPajak from "@/components/filter-jenis-pajak";
 
 // import ProgressValueCard from "@/components/progress-value-card";
 // import { BarChartMultipleCard } from "@/components/bar-chart-multiple";
@@ -41,14 +42,11 @@ export default async function Home({
       <section className="flex flex-col gap-3">
         <div className="flex flex-row gap-3 items-center print:hidden">
           <SearchBar />
-          <MonthFilter
-            selectedMonth={Number(searchParams.month)}
-            selectedYear={Number(searchParams.year)}
-          />
-          <FilterYear
-            selectedMonth={Number(searchParams.month)}
-            selectedYear={Number(searchParams.year)}
-          />
+          <div className="flex flex-row gap-2">
+            <FilterJenisPajak />
+            <MonthFilter />
+            <FilterYear />
+          </div>
           <TotalKegiatan />
           <div className="flex flex-row justify-end gap-3">
             <NewTimDialog buttonVariant="outline" />
@@ -57,9 +55,12 @@ export default async function Home({
         </div>
         <Suspense fallback={<TableSkeleton row={10} column={8} />}>
           <DaftarKegiatanTable
-            search={searchParams.search}
+            search={searchParams.search as string | undefined}
             selectedYear={Number(searchParams.year)}
             selectedMonth={Number(searchParams.month)}
+            selectedJenisPajakId={
+              searchParams.jenisPajakId as string | undefined
+            }
           />
         </Suspense>
       </section>
