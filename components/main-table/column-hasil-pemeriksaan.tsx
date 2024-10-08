@@ -46,7 +46,7 @@ export function KolomHasilPemeriksaan({
   const latestPokok =
     latestPokokAfterLatestMasaPajak.length > 0
       ? latestPokokAfterLatestMasaPajak[0].Pokok
-      : null;
+      : NaN;
 
   const percentChange =
     ((Number(latestPokok) - averageThreeEarliestSetoranTerdekat) /
@@ -78,7 +78,7 @@ export function KolomHasilPemeriksaan({
                   : "text-muted-foreground"
               }`}
             />
-          ) : (
+          ) : Number.isNaN(latestPokok) ? null : (
             <TrendingDown
               className={`w-3 h-3 ${
                 percentChange <= 0 ? "text-red-500" : "text-muted-foreground"
