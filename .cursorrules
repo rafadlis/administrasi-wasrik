@@ -1,10 +1,11 @@
-1. Component Library: Utilize Shadcn UI as the primary component library for consistent and pre-built UI elements.
-2. Framework: Implement Next.js as the React framework for server-side rendering and routing capabilities.
-3. Styling: Apply Tailwind CSS for utility-first styling and responsive design.
-4. Programming Language: Write all code in TypeScript for static typing and enhanced developer experience.
-5. Database ORM: Use Prisma as the Object-Relational Mapping tool for database operations and schema management.
-6. Authentication: Implement Supabase Auth for user authentication and authorization features.
-7. Code Structure: Follow Next.js conventions for file and folder organization.
-8. Component Design: Create reusable and modular components adhering to Shadcn UI and Tailwind CSS best practices.
-9. API Routes: Utilize Next.js API routes for server-side logic and API endpoints.
-10. Type Safety: Ensure proper TypeScript typing across all components, functions, and API calls.
+• Use Shadcn UI for components
+• Build with Next.js
+• Style with Tailwind CSS
+• Write in TypeScript
+• always use Prisma for mutations
+• Implement Supabase Auth
+• Follow Next.js file structure
+• Create reusable components
+• Use Next.js API routes
+• Ensure proper TypeScript typing
+• always use Vercel SWR for client data fetching but using prisma for server side fetching
