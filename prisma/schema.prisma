@@ -33,7 +33,7 @@ model DataReklame {
   KlasifikasiJalan          KlasifikasiJalan @relation(fields: [klasifikasi_jalan_id], references: [id])
   KlasifikasiRuang          KlasifikasiRuang @relation(fields: [klasifikasi_ruang_id], references: [id])
   KlasifikasiSudut          KlasifikasiSudut @relation(fields: [klasifikasi_sudut_id], references: [id])
-  ObjekPajak                ObjekPajak       @relation(fields: [objek_pajak_id], references: [id])
+  ObjekPajak                ObjekPajak       @relation(fields: [objek_pajak_id], references: [id], onDelete: Cascade)
 
   @@schema("pajak_admin")
 }
@@ -148,6 +148,7 @@ model KodeBayar {
   JenisPajak             JenisPajak               @relation(fields: [jenis_pajak_id], references: [id])
   ObjekPajak             ObjekPajak               @relation(fields: [objek_pajak_id], references: [id])
   Surat                  Surat?                   @relation(fields: [surat_id], references: [id])
+  PemungutanPajak        PemungutanPajak[]
   SetoranPembayaranPajak SetoranPembayaranPajak[]
   SKPD                   SKPD[]
   SPTPD                  SPTPD[]
@@ -179,6 +180,20 @@ model LaporMasalah {
   status       String?
   createAt     DateTime @default(now())
   updateAt     DateTime
+
+  @@schema("pajak_admin")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model PemungutanPajak {
+  id                     BigInt             @id @default(autoincrement())
+  created_at             DateTime           @default(now()) @db.Timestamptz(6)
+  instansi_pemerintah_id BigInt
+  kode_bayar             String?
+  sptpd_id               Int?
+  InstansiPemerintah     InstansiPemerintah @relation(fields: [instansi_pemerintah_id], references: [id])
+  KodeBayar              KodeBayar?         @relation(fields: [kode_bayar], references: [id], onDelete: Restrict)
+  SPTPD                  SPTPD?             @relation(fields: [sptpd_id], references: [id], onDelete: Restrict)
 
   @@schema("pajak_admin")
 }
@@ -240,8 +255,9 @@ model KontakEmail {
   id                BigInt      @id @default(autoincrement())
   created_at        DateTime    @default(now()) @db.Timestamptz(6)
   wajib_pajak_id    Int?
-  email             String?
+  email             String?     @unique
   email_verified_at DateTime?   @db.Timestamptz(6)
+  is_utama          Boolean     @default(false)
   WajibPajak        WajibPajak? @relation(fields: [wajib_pajak_id], references: [id])
 
   @@schema("pajak_general")
@@ -251,22 +267,23 @@ model KontakEmail {
 model KontakTelepon {
   id             BigInt      @id @default(autoincrement())
   wajib_pajak_id Int?
-  no_telepon     String?
+  no_telepon     String?     @unique
   verified_at    DateTime?   @db.Timestamptz(6)
   created_at     DateTime    @default(now()) @db.Timestamptz(6)
+  is_utama       Boolean?    @default(false)
   WajibPajak     WajibPajak? @relation(fields: [wajib_pajak_id], references: [id])
 
   @@schema("pajak_general")
 }
 
 model ObjekPajak {
-  id                  Int           @id @default(autoincrement())
+  id                  Int                @id @default(autoincrement())
   nomor_objek_pajak   String?
   wajib_pajak_id      Int
   jenis_pajak_id      Int?
   nama_unik           String?
   terhapus            DateTime?
-  createdAt           DateTime      @default(now())
+  createdAt           DateTime           @default(now())
   updatedAt           DateTime
   RT                  String
   RW                  String
@@ -276,61 +293,96 @@ model ObjekPajak {
   kode_kecamatan      String
   kode_provinsi       String
   koordinat           String?
+  is_aktif            Boolean?           @default(true)
   DataReklame         DataReklame[]
   JurnalDebit         JurnalDebit[]
   KodeBayar           KodeBayar[]
-  JenisPajak          JenisPajak?   @relation(fields: [jenis_pajak_id], references: [id])
-  Provinsi            Provinsi      @relation(fields: [kode_provinsi], references: [kode_provinsi])
-  Kabupaten           Kabupaten     @relation(fields: [kode_provinsi, kode_kabupaten], references: [kode_provinsi, kode_kabupaten])
-  Kecamatan           Kecamatan     @relation(fields: [kode_provinsi, kode_kabupaten, kode_kecamatan], references: [kode_provinsi, kode_kabupaten, kode_kecamatan])
-  DesaKelurahan       DesaKelurahan @relation(fields: [kode_provinsi, kode_kabupaten, kode_kecamatan, kode_desa_kelurahan], references: [kode_provinsi, kode_kabupaten, kode_kecamatan, kode_desa_kelurahan])
-  WajibPajak          WajibPajak    @relation(fields: [wajib_pajak_id], references: [id])
+  JenisPajak          JenisPajak?        @relation(fields: [jenis_pajak_id], references: [id])
+  Provinsi            Provinsi           @relation(fields: [kode_provinsi], references: [kode_provinsi])
+  Kabupaten           Kabupaten          @relation(fields: [kode_provinsi, kode_kabupaten], references: [kode_provinsi, kode_kabupaten])
+  Kecamatan           Kecamatan          @relation(fields: [kode_provinsi, kode_kabupaten, kode_kecamatan], references: [kode_provinsi, kode_kabupaten, kode_kecamatan])
+  DesaKelurahan       DesaKelurahan      @relation(fields: [kode_provinsi, kode_kabupaten, kode_kecamatan, kode_desa_kelurahan], references: [kode_provinsi, kode_kabupaten, kode_kecamatan, kode_desa_kelurahan])
+  WajibPajak          WajibPajak         @relation(fields: [wajib_pajak_id], references: [id])
+  ObjekPajakStatus    ObjekPajakStatus[]
   SKPD                SKPD[]
   SPTPD               SPTPD[]
 
   @@schema("pajak_general")
 }
 
-model PengurusBadan {
-  id               Int          @id @default(autoincrement())
-  badan_id         String
-  orang_pribadi_id String
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime
-  jabatan          String
-  Badan            Badan        @relation(fields: [badan_id], references: [id], onDelete: Cascade)
-  OrangPribadi     OrangPribadi @relation(fields: [orang_pribadi_id], references: [id], onDelete: Cascade)
-
-  @@schema("pajak_general")
-}
-
-model StatusAktif {
-  id             Int        @id @default(autoincrement())
-  wajib_pajak_id Int
-  nonaktif       DateTime
-  aktif_kembali  DateTime?
-  createdAt      DateTime   @default(now())
-  UpdateAt       DateTime
+model ObjekPajakStatus {
+  id             BigInt     @id(map: "StatusObjekPajak_pkey") @default(autoincrement())
+  created_at     DateTime   @default(now()) @db.Timestamptz(6)
+  objek_pajak_id Int
+  is_aktif       Boolean    @default(true)
+  tanggal        DateTime   @db.Timestamptz(6)
   alasan         String
   referensi      String?
-  WajibPajak     WajibPajak @relation(fields: [wajib_pajak_id], references: [id])
+  ObjekPajak     ObjekPajak @relation(fields: [objek_pajak_id], references: [id])
 
   @@schema("pajak_general")
 }
 
+model PengurusBadan {
+  id                  Int                   @id @default(autoincrement())
+  badan_id            String?
+  orang_pribadi_id    String
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime
+  jabatan             String
+  pemerintah_id       BigInt?
+  is_aktif            Boolean?              @default(true)
+  Badan               Badan?                @relation(fields: [badan_id], references: [id], onDelete: Cascade)
+  OrangPribadi        OrangPribadi          @relation(fields: [orang_pribadi_id], references: [id], onDelete: Cascade)
+  InstansiPemerintah  InstansiPemerintah?   @relation(fields: [pemerintah_id], references: [id], onDelete: SetDefault)
+  PengurusBadanStatus PengurusBadanStatus[]
+
+  @@schema("pajak_general")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model PengurusBadanStatus {
+  id            BigInt        @id @default(autoincrement())
+  created_at    DateTime      @default(now()) @db.Timestamptz(6)
+  pengurus_id   Int
+  is_aktif      Boolean       @default(false)
+  tanggal       DateTime      @default(now()) @db.Timestamptz(6)
+  alasan        String
+  referensi     String?
+  PengurusBadan PengurusBadan @relation(fields: [pengurus_id], references: [id], onDelete: Cascade)
+
+  @@schema("pajak_general")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model WajibPajak {
-  id               Int             @id @default(autoincrement())
-  orang_pribadi_id String?
-  badan_id         String?
-  NPWPD            String          @unique
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime
-  KontakEmail      KontakEmail[]
-  KontakTelepon    KontakTelepon[]
-  ObjekPajak       ObjekPajak[]
-  StatusAktif      StatusAktif[]
-  Badan            Badan?          @relation(fields: [badan_id], references: [id])
-  OrangPribadi     OrangPribadi?   @relation(fields: [orang_pribadi_id], references: [id])
+  id                     Int                 @id @default(autoincrement())
+  orang_pribadi_id       String?
+  badan_id               String?
+  NPWPD                  String              @unique
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime
+  instansi_pemerintah_id BigInt?             @unique
+  KontakEmail            KontakEmail[]
+  KontakTelepon          KontakTelepon[]
+  ObjekPajak             ObjekPajak[]
+  Badan                  Badan?              @relation(fields: [badan_id], references: [id])
+  InstansiPemerintah     InstansiPemerintah? @relation(fields: [instansi_pemerintah_id], references: [id], onDelete: NoAction)
+  OrangPribadi           OrangPribadi?       @relation(fields: [orang_pribadi_id], references: [id])
+  WajibPajakStatus       WajibPajakStatus[]
+
+  @@schema("pajak_general")
+}
+
+model WajibPajakStatus {
+  id             Int        @id(map: "StatusAktif_pkey") @default(autoincrement())
+  wajib_pajak_id Int
+  createdAt      DateTime   @default(now())
+  tanggal        DateTime
+  alasan         String
+  referensi      String?
+  is_aktif       Boolean    @default(true)
+  WajibPajak     WajibPajak @relation(fields: [wajib_pajak_id], references: [id], map: "StatusAktif_wajib_pajak_id_fkey")
 
   @@schema("pajak_general")
 }
@@ -357,9 +409,9 @@ model SKPD {
 }
 
 model SPTPD {
-  id                Int        @id @default(autoincrement())
+  id                Int               @id @default(autoincrement())
   nomor_urut        String?
-  nomor_surat       String?    @unique
+  nomor_surat       String?           @unique
   objek_pajak_id    Int
   omzet             BigInt?
   pajak             BigInt?
@@ -369,11 +421,12 @@ model SPTPD {
   kode_bayar_id     String?
   surat_id          Int
   tanggal_pembuatan DateTime?
-  createdAt         DateTime   @default(now())
+  createdAt         DateTime          @default(now())
   updatedAt         DateTime
-  KodeBayar         KodeBayar? @relation(fields: [kode_bayar_id], references: [id])
-  ObjekPajak        ObjekPajak @relation(fields: [objek_pajak_id], references: [id])
-  Surat             Surat      @relation(fields: [surat_id], references: [id])
+  PemungutanPajak   PemungutanPajak[]
+  KodeBayar         KodeBayar?        @relation(fields: [kode_bayar_id], references: [id])
+  ObjekPajak        ObjekPajak        @relation(fields: [objek_pajak_id], references: [id])
+  Surat             Surat             @relation(fields: [surat_id], references: [id])
 
   @@schema("pajak_surat")
 }
@@ -461,6 +514,7 @@ model KategoriProgresPemeriksaan {
   keterangan         String?
   createdAt          DateTime             @default(now())
   updatedAt          DateTime
+  awalan_nomor_surat String               @default("900.1.13.1")
   ProgresPemeriksaan ProgresPemeriksaan[]
 
   @@schema("pajak_wasrik")
@@ -689,32 +743,54 @@ model DesaKelurahan {
   @@schema("public")
 }
 
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model InstansiPemerintah {
+  id                   BigInt               @id @default(autoincrement())
+  created_at           DateTime             @default(now()) @db.Timestamptz(6)
+  nama                 String
+  klasifikasi_instansi klasifikasi_instansi
+  nama_singkatan       String?
+  kode_kecamatan       String?
+  kode_kabupaten       String?
+  kode_provinsi        String?
+  PemungutanPajak      PemungutanPajak[]
+  PengurusBadan        PengurusBadan[]
+  WajibPajak           WajibPajak?
+  Kabupaten            Kabupaten?           @relation(fields: [kode_kabupaten, kode_provinsi], references: [kode_kabupaten, kode_provinsi], onDelete: NoAction, onUpdate: NoAction, map: "fk_kabupaten_ids")
+  Kecamatan            Kecamatan?           @relation(fields: [kode_kecamatan, kode_kabupaten, kode_provinsi], references: [kode_kecamatan, kode_kabupaten, kode_provinsi], onDelete: NoAction, onUpdate: NoAction, map: "fk_kecamatan_ids")
+  Provinsi             Provinsi?            @relation(fields: [kode_provinsi], references: [kode_provinsi], onDelete: NoAction, onUpdate: NoAction, map: "fk_provinsi_ids")
+
+  @@schema("public")
+}
+
 model Kabupaten {
-  kode_provinsi  String
-  kode_kabupaten String
-  nama           String
-  ObjekPajak     ObjekPajak[]
-  Badan          Badan[]
-  DesaKelurahan  DesaKelurahan[]
-  Provinsi       Provinsi        @relation(fields: [kode_provinsi], references: [kode_provinsi])
-  Kecamatan      Kecamatan[]
-  OrangPribadi   OrangPribadi[]
+  kode_provinsi      String
+  kode_kabupaten     String
+  nama               String
+  ObjekPajak         ObjekPajak[]
+  Badan              Badan[]
+  DesaKelurahan      DesaKelurahan[]
+  InstansiPemerintah InstansiPemerintah[]
+  Provinsi           Provinsi             @relation(fields: [kode_provinsi], references: [kode_provinsi])
+  Kecamatan          Kecamatan[]
+  OrangPribadi       OrangPribadi[]
 
   @@id([kode_provinsi, kode_kabupaten])
   @@schema("public")
 }
 
 model Kecamatan {
-  kode_provinsi  String
-  kode_kabupaten String
-  kode_kecamatan String
-  nama           String
-  ObjekPajak     ObjekPajak[]
-  Badan          Badan[]
-  DesaKelurahan  DesaKelurahan[]
-  Provinsi       Provinsi        @relation(fields: [kode_provinsi], references: [kode_provinsi])
-  Kabupaten      Kabupaten       @relation(fields: [kode_provinsi, kode_kabupaten], references: [kode_provinsi, kode_kabupaten])
-  OrangPribadi   OrangPribadi[]
+  kode_provinsi      String
+  kode_kabupaten     String
+  kode_kecamatan     String
+  nama               String
+  ObjekPajak         ObjekPajak[]
+  Badan              Badan[]
+  DesaKelurahan      DesaKelurahan[]
+  InstansiPemerintah InstansiPemerintah[]
+  Provinsi           Provinsi             @relation(fields: [kode_provinsi], references: [kode_provinsi])
+  Kabupaten          Kabupaten            @relation(fields: [kode_provinsi, kode_kabupaten], references: [kode_provinsi, kode_kabupaten])
+  OrangPribadi       OrangPribadi[]
 
   @@id([kode_provinsi, kode_kabupaten, kode_kecamatan])
   @@schema("public")
@@ -770,14 +846,15 @@ model Pegawai {
 }
 
 model Provinsi {
-  nama          String
-  kode_provinsi String          @id
-  ObjekPajak    ObjekPajak[]
-  Badan         Badan[]
-  DesaKelurahan DesaKelurahan[]
-  Kabupaten     Kabupaten[]
-  Kecamatan     Kecamatan[]
-  OrangPribadi  OrangPribadi[]
+  nama               String
+  kode_provinsi      String               @id
+  ObjekPajak         ObjekPajak[]
+  Badan              Badan[]
+  DesaKelurahan      DesaKelurahan[]
+  InstansiPemerintah InstansiPemerintah[]
+  Kabupaten          Kabupaten[]
+  Kecamatan          Kecamatan[]
+  OrangPribadi       OrangPribadi[]
 
   @@schema("public")
 }
@@ -887,6 +964,18 @@ enum bidang_bapenda {
   pendataan
   wasrik
   ti
+
+  @@schema("public")
+}
+
+/// This enum is commented in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+enum klasifikasi_instansi {
+  Kementerian
+  Lembaga_Non_Kementerian @map("Lembaga Non Kementerian")
+  Provinsi
+  Kota_Kabupaten          @map("Kota/Kabupaten")
+  Kecamatan
+  Kelurahan_Desa          @map("Kelurahan/Desa")
 
   @@schema("public")
 }

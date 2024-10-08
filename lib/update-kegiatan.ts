@@ -37,6 +37,37 @@ export async function updateProgresPemeriksaan(
   id: number,
   data: Partial<ProgresPemeriksaan>
 ) {
+  const startNumber = await db.progresPemeriksaan.findFirst({
+    where: {
+      id: id,
+    },
+    select: {
+      nomor_surat: true,
+      KategoriProgresPemeriksaan: {
+        select: {
+          awalan_nomor_surat: true,
+        },
+      },
+    },
+  });
+  if (!startNumber) {
+    console.log("startNumber tidak ada");
+    return {
+      header: "Gagal",
+      message: "Hubungi admin untuk mengetahi penyebabnya",
+      type: "error",
+    };
+  }
+  const isNomorSuratHasValidStartNumber = data.nomor_surat?.startsWith(
+    startNumber.KategoriProgresPemeriksaan.awalan_nomor_surat
+  );
+  if (!isNomorSuratHasValidStartNumber) {
+    return {
+      header: "Awalan Nomor Surat Tidak Sesuai",
+      message: `Untuk jenis surat ini, gunakan awalan ${startNumber.KategoriProgresPemeriksaan.awalan_nomor_surat}`,
+      type: "warning",
+    };
+  }
   try {
     if (data.nomor_surat) {
       const existingNomorSurat = await db.progresPemeriksaan.findUnique({
