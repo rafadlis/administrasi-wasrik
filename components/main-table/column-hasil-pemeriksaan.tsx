@@ -24,6 +24,7 @@ export function KolomHasilPemeriksaan({
 }: {
   data: DaftarKegiatanPemeriksaanType[0];
 }) {
+  // MARK: hitungan
   const { dataHasilPemeriksaan } = useHasilPemeriksaan();
   const latestMasaPajak = new Date(data.masa_pajak_akhir || "");
   const { setoranTerdekat, isLoadingNearestSetoran } = GetSetoranTerdekat(
@@ -52,47 +53,9 @@ export function KolomHasilPemeriksaan({
     ((Number(latestPokok) - averageThreeEarliestSetoranTerdekat) /
       averageThreeEarliestSetoranTerdekat) *
     100;
-
+  // MARK: render
   return (
     <div className="flex flex-row gap-2">
-      {isLoadingNearestSetoran && !percentChange ? (
-        <Skeleton className="w-14 h-4 order-last" />
-      ) : (
-        <Badge
-          className={`order-last text-muted-foreground flex flex-row gap-2 justify-center items-center ${
-            percentChange > 100
-              ? "text-green-700"
-              : percentChange <= 0
-              ? "text-red-500"
-              : "text-muted-foreground"
-          }`}
-          variant="outline"
-        >
-          {percentChange > 0 ? (
-            <TrendingUp
-              className={`w-3 h-3 ${
-                percentChange > 100
-                  ? "text-green-500"
-                  : percentChange < 50 && percentChange > 0
-                  ? "text-yellow-500"
-                  : "text-muted-foreground"
-              }`}
-            />
-          ) : Number.isNaN(latestPokok) ? null : (
-            <TrendingDown
-              className={`w-3 h-3 ${
-                percentChange <= 0 ? "text-red-500" : "text-muted-foreground"
-              }`}
-            />
-          )}
-          {percentChange.toLocaleString("id-ID", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}
-          %
-        </Badge>
-      )}
-
       <Popover>
         <PopoverTrigger>
           <Badge
@@ -148,6 +111,92 @@ export function KolomHasilPemeriksaan({
           </Select>
         </PopoverContent>
       </Popover>
+      {/* MARK: extimasi hasil pemeriksaan */}
+      {isLoadingNearestSetoran && !percentChange ? (
+        <Skeleton className="w-14 h-4 order-last" />
+      ) : (
+        <Popover>
+          <PopoverTrigger>
+            <Badge
+              className={`text-muted-foreground flex flex-row gap-2 justify-center items-center ${
+                percentChange > 100
+                  ? "text-green-700"
+                  : percentChange <= 0
+                  ? "text-red-500"
+                  : "text-muted-foreground"
+              }`}
+              variant="outline"
+            >
+              {percentChange > 0 ? (
+                <TrendingUp
+                  className={`w-3 h-3 ${
+                    percentChange > 100
+                      ? "text-green-500"
+                      : percentChange < 50 && percentChange > 0
+                      ? "text-yellow-500"
+                      : "text-muted-foreground"
+                  }`}
+                />
+              ) : Number.isNaN(latestPokok) ? null : (
+                <TrendingDown
+                  className={`w-3 h-3 ${
+                    percentChange <= 0
+                      ? "text-red-500"
+                      : "text-muted-foreground"
+                  }`}
+                />
+              )}
+              {percentChange.toLocaleString("id-ID", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+              %
+            </Badge>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto flex flex-col gap-2 items-end">
+            {setoranTerdekat
+              .sort(
+                (b, a) =>
+                  new Date(b.MasaPajak).getTime() -
+                  new Date(a.MasaPajak).getTime()
+              )
+              .filter((item) => Number(item.Pokok) > 0)
+              .map((item, index) => (
+                <div
+                  key={index}
+                  className="w-full text-sm flex flex-row gap-3 justify-center items-center"
+                >
+                  <div className="flex flex-row justify-between w-full gap-4">
+                    <p className="text-muted-foreground">
+                      {new Date(item.MasaPajak).toLocaleDateString("id-ID", {
+                        month: "2-digit",
+                        year: "numeric",
+                      })}
+                    </p>
+                    <p>{Number(item.Pokok).toLocaleString("id-ID")}</p>
+                  </div>
+                  {/* dot */}
+                  <div className="relative w-2 h-2">
+                    <div
+                      className={`absolute w-2 h-2 rounded-full animate-ping ${
+                        new Date(item.MasaPajak) < latestMasaPajak
+                          ? "bg-muted-foreground"
+                          : "bg-blue-500"
+                      }`}
+                    ></div>
+                    <div
+                      className={`absolute w-2 h-2 rounded-full ${
+                        new Date(item.MasaPajak) < latestMasaPajak
+                          ? "bg-muted-foreground"
+                          : "bg-blue-500"
+                      }`}
+                    ></div>
+                  </div>
+                </div>
+              ))}
+          </PopoverContent>
+        </Popover>
+      )}
     </div>
   );
 }
