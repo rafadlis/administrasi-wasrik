@@ -58,15 +58,18 @@ export async function updateProgresPemeriksaan(
       type: "error",
     };
   }
-  const isNomorSuratHasValidStartNumber = data.nomor_surat?.startsWith(
-    startNumber.KategoriProgresPemeriksaan.awalan_nomor_surat
-  );
-  if (!isNomorSuratHasValidStartNumber) {
-    return {
-      header: "Awalan Nomor Surat Tidak Sesuai",
-      message: `Untuk jenis surat ini, gunakan awalan ${startNumber.KategoriProgresPemeriksaan.awalan_nomor_surat}`,
-      type: "warning",
-    };
+  let isNomorSuratHasValidStartNumber;
+  if (data.nomor_surat) {
+    isNomorSuratHasValidStartNumber = data.nomor_surat?.startsWith(
+      startNumber.KategoriProgresPemeriksaan.awalan_nomor_surat
+    );
+    if (!isNomorSuratHasValidStartNumber) {
+      return {
+        header: "Awalan Nomor Surat Tidak Sesuai",
+        message: `Untuk jenis surat ini, gunakan awalan ${startNumber.KategoriProgresPemeriksaan.awalan_nomor_surat}`,
+        type: "warning",
+      };
+    }
   }
   try {
     if (data.nomor_surat) {
