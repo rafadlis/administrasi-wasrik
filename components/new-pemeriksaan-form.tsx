@@ -113,6 +113,10 @@ function NewKegiatanForm({ onSuccess }: { onSuccess: () => void }) {
             description: res.message,
           });
           onSuccess();
+        } else if (res.type === "warning") {
+          toast.warning(res.header, {
+            description: res.message,
+          });
         } else if (res.type === "error") {
           toast.error(res.header, {
             description: res.message,

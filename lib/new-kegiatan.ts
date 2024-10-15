@@ -27,6 +27,25 @@ export async function newKegiatan(data: z.infer<typeof newKegiatanSchema>) {
     hasil_pemeriksaan_id,
     tim_id,
   } = validatedFields.data;
+
+  // Mark: check if the WP and masa pajak is already exist
+  const isWPAndMasaPajakExist = await db.kegiatanPemeriksaan.findFirst({
+    where: {
+      NPWPD,
+      masa_pajak_awal,
+      masa_pajak_akhir,
+    },
+  });
+
+  if (isWPAndMasaPajakExist) {
+    console.log("WP and masa pajak is already exist");
+    return {
+      header: "Anda yakin?",
+      message: "Kegiatan dengan WP dan masa pajak tersebut sudah ada",
+      type: "warning",
+    };
+  }
+
   await db.kegiatanPemeriksaan.create({
     data: {
       NPWPD,
