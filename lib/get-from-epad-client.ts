@@ -51,7 +51,12 @@ export function GetSetoranTerdekat(
 ) {
   const { data, error, isLoading } = useSWR<{ data: NearestSetoranType }>(
     ["/api/setoran-terdekat", NPWPD, theDate],
-    ([url, NPWPD, theDate]) => getSetoranTerdekatFetcher(url, NPWPD, theDate)
+    ([url, NPWPD, theDate]) => getSetoranTerdekatFetcher(url, NPWPD, theDate),
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      refreshInterval: 1000 * 60 * 5,
+    }
   );
   return {
     setoranTerdekat: data?.data || [],

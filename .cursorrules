@@ -1,11 +1,14 @@
-• Use Shadcn UI for components
-• Build with Next.js
-• Style with Tailwind CSS
-• Write in TypeScript
-• always use Prisma for mutations
-• Implement Supabase Auth
-• Follow Next.js file structure
-• Create reusable components
-• Use Next.js API routes
-• Ensure proper TypeScript typing
-• always use Vercel SWR for client data fetching but using prisma for server side fetching
+- Use Shadcn UI for components
+- Build with Next.js
+- Style with Tailwind CSS
+- Write in TypeScript
+- always use Prisma for mutations
+- Implement Supabase Auth
+- Follow Next.js file structure
+- Create reusable components
+- Use Next.js API routes
+- Ensure proper TypeScript typing
+- always use Vercel SWR for client data fetching but using prisma for server side fetching
+- Use react-pdf for generating pdf
+- Use lucide-react for icons
+- Use zod for validation

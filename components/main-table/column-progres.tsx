@@ -14,7 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Delete, FolderOpen } from "lucide-react";
+import { Delete, FolderOpen, NotepadTextDashed } from "lucide-react";
 import { DaftarKegiatanPemeriksaanType } from "@/lib/get-kegiatan";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -285,8 +285,11 @@ export function KolomProgres({
                 <TableCell className="flex gap-2">
                   <Popover>
                     {progres.file_url === null && (
-                      <PopoverTrigger>
-                        <Button size="icon" variant="secondary">
+                      <PopoverTrigger
+                        asChild
+                        disabled={progres.nomor_surat === null}
+                      >
+                        <Button size="icon" variant="ghost">
                           <Upload className="w-4 h-4" />
                         </Button>
                       </PopoverTrigger>
@@ -340,7 +343,7 @@ export function KolomProgres({
                   {progres.file_url && (
                     <Button
                       size="icon"
-                      variant="secondary"
+                      variant="ghost"
                       disabled={progres.file_url === null}
                       asChild
                     >
