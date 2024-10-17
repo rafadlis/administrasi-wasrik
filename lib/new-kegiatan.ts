@@ -30,7 +30,7 @@ export async function newKegiatan(data: z.infer<typeof newKegiatanSchema>) {
 
   // Mark: check if the WP and masa pajak is already exist
   let isWPAndMasaPajakExist = null;
-  if (NPWPD !== null) {
+  if (NPWPD !== null && NPWPD !== undefined) {
     isWPAndMasaPajakExist = await db.kegiatanPemeriksaan.findFirst({
       where: {
         NPWPD,
@@ -47,7 +47,7 @@ export async function newKegiatan(data: z.infer<typeof newKegiatanSchema>) {
         type: "warning",
       };
     }
-  } else if (NPWPD === null) {
+  } else if (NPWPD === null || NPWPD === undefined) {
     isWPAndMasaPajakExist = await db.kegiatanPemeriksaan.findFirst({
       where: {
         nama_wp,
