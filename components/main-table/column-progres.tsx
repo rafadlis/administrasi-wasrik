@@ -388,6 +388,16 @@ export function KolomProgres({
                       <Trash className="w-4 h-4" />
                     </Button>
                   )}
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    disabled={progres.nomor_surat === null}
+                    asChild
+                  >
+                    <Link href={`/surat/view?id=${progres.id}`} target="_blank">
+                      <NotepadTextDashed className="w-4 h-4" />
+                    </Link>
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}
