@@ -46,3 +46,38 @@ export async function getDataForSuratSP(id: number) {
 export type DataForSuratSPType = NonNullable<
   Awaited<ReturnType<typeof getDataForSuratSP>>
 >;
+
+export async function getDaftarLHP() {
+  const data = await db.progresPemeriksaan.findMany({
+    where: {
+      KategoriProgresPemeriksaan: {
+        nama: "LHP",
+      },
+      file_url: {
+        not: null,
+      },
+    },
+    select: {
+      id: true,
+      nomor_surat: true,
+      tanggal_surat: true,
+      file_url: true,
+      KegiatanPemeriksaan: {
+        select: {
+          NPWPD: true,
+          nama_wp: true,
+        },
+      },
+      KategoriProgresPemeriksaan: {
+        select: {
+          nama: true,
+        },
+      },
+    },
+  });
+  return data;
+}
+
+export type DaftarLHPType = NonNullable<
+  Awaited<ReturnType<typeof getDaftarLHP>>
+>;

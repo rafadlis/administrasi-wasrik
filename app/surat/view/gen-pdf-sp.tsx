@@ -11,7 +11,7 @@ import {
 } from "@react-pdf/renderer";
 import { useEffect, useState } from "react";
 import KopSuratPdf from "./kop-surat-pdf";
-import { DataForSuratSPType } from "@/lib/get-for-surat";
+import { DataForSuratSPType } from "@/lib/get-surat";
 
 Font.register({
   family: "Arial",

@@ -1,4 +1,4 @@
-import { getDataForSuratSP } from "@/lib/get-for-surat";
+import { getDataForSuratSP } from "@/lib/get-surat";
 import { SpPdfViewer } from "./gen-pdf-sp";
 
 export default async function ViewPDF({
