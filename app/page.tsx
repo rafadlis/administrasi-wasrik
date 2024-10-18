@@ -54,6 +54,9 @@ export default async function Home({
           </div>
         </div>
         <Suspense fallback={<TableSkeleton row={10} column={8} />}>
+          <h1 className="w-full text-center text-2xl font-bold hidden print:block">
+            Pemeriksaan Pajak tahun 2024
+          </h1>
           <DaftarKegiatanTable
             search={searchParams.search as string | undefined}
             selectedYear={Number(searchParams.year)}
