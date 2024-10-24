@@ -66,4 +66,7 @@
   body {
     @apply bg-background text-foreground;
   }
+  .fields {
+    @apply grid gap-4;
+  }
 }

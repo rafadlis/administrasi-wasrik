@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,32 +9,60 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormLabel,
+  FormField,
+  FormMessage,
+  FormItem,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
+import { z } from "zod";
+import { login } from "@/lib/login";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useTransition } from "react";
+import { LoaderCircle } from "lucide-react";
+
+const loginSchema = z.object({
+  email: z.string().email(),
+  password: z.string(),
+});
 export function LoginForm() {
-  const supabase = createClient();
-  const router = useRouter();
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
-    await supabase.auth
-      .signInWithPassword({
-        email,
-        password,
-      })
-      .then(({ error }) => {
-        if (error) {
-          toast.error(error.message);
-        } else {
-          toast.success("Berhasil masuk");
-          router.push("/");
+  const [isPending, startTransition] = useTransition();
+  const form = useForm<z.infer<typeof loginSchema>>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  function onSubmit(values: z.infer<typeof loginSchema>) {
+    startTransition(() => {
+      login(values).then((res) => {
+        if (res?.type === "error") {
+          toast.error(res.head, {
+            description: res.message,
+          });
+        }
+
+        if (res?.type === "success") {
+          toast.success(res.head, {
+            description: res.message,
+          });
+        }
+
+        if (res?.type === "warning") {
+          toast.warning(res.head, {
+            description: res.message,
+          });
         }
       });
-  };
+    });
+  }
 
   return (
     <Card className="mx-auto max-w-sm">
@@ -46,30 +73,60 @@ export function LoginForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form className="grid gap-4" onSubmit={handleSubmit}>
-          <fieldset className="grid gap-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="fields">
+            <FormField
+              control={form.control}
               name="email"
-              type="email"
-              placeholder="m@example.com"
-              required
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="email"
+                      placeholder="contoh@email.com"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </fieldset>
-          <fieldset className="grid gap-2">
-            <div className="flex items-center">
-              <Label htmlFor="password">Password</Label>
-              <Link href="#" className="ml-auto inline-block text-sm underline">
-                Lupa password?
-              </Link>
-            </div>
-            <Input id="password" name="password" type="password" required />
-          </fieldset>
-          <Button type="submit" className="w-full">
-            Masuk
-          </Button>
-        </form>
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex justify-between">
+                    <div>Kata Sandi</div>
+                    <Link
+                      href="/forgot-password"
+                      className="underline text-muted-foreground"
+                    >
+                      Lupa kata sandi?
+                    </Link>
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      placeholder="Kata sandi kamu"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type="submit" className="w-full" disabled={isPending}>
+              {isPending ? (
+                <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                ""
+              )}
+              {isPending ? "Mencoba masuk..." : "Masuk"}
+            </Button>
+          </form>
+        </Form>
       </CardContent>
     </Card>
   );
